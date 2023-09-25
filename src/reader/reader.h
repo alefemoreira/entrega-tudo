@@ -2,10 +2,10 @@
 #define READER_H
 
 #include <iostream>
+#include <string>
 
 class Reader {
 private:
-  static Reader *instance;
   int dimension;     // n
   int maxVehicles;   // k
   int carCapacity;   // Q
@@ -16,22 +16,26 @@ private:
   int *outsourcing;
   double **distances;
 
+  std::string instancePath;
+
 public:
-  Reader();
+  Reader(std::string path);
   ~Reader();
 
-  double getDistante(int i, int j) { return this->distances[i][j]; }
-  int getDemand(int i) { return this->demands[i]; }
-  int getOutsourcing(int i) { return this->outsourcing[i]; }
-  int getCarCapacity() { return this->carCapacity; }
-  int getDimension() { return this->dimension; }
-  int getMAxVehiclesQuantity() { return this->maxVehicles; }
-  double getCarUseCost() { return this->carUseCost; }
-  int getMinimumDelivery() { return this->minDelivery; }
+  static Reader *instance;
+
+  static void create(std::string path);
+
+  void read();
+
+  inline double getDistante(int i, int j) { return this->distances[i][j]; }
+  inline int getDemand(int i) { return this->demands[i]; }
+  inline int getOutsourcing(int i) { return this->outsourcing[i]; }
+  inline int getCarCapacity() { return this->carCapacity; }
+  inline int getDimension() { return this->dimension; }
+  inline int getMAxVehiclesQuantity() { return this->maxVehicles; }
+  inline double getCarUseCost() { return this->carUseCost; }
+  inline int getMinimumDelivery() { return this->minDelivery; }
 };
-
-Reader::Reader() {}
-
-Reader::~Reader() {}
 
 #endif

@@ -1,4 +1,5 @@
 # Pre-compiler and Compiler flags
+CXX := g++
 CXX_FLAGS := -Wall -Wextra -std=c++17 -ggdb
 PRE_FLAGS := -MMD -MP
 
@@ -16,7 +17,7 @@ BUILD := build
 # Library search directories and flags
 EXT_LIB :=
 LDFLAGS :=
-LDPATHS := # $(addprefix -L,$(LIB) $(EXT_LIB))
+LDPATHS := $(addprefix -L,$(LIB) $(EXT_LIB))
 
 # Include directories
 INC_DIRS := $(INC) $(shell find $(SRC) -type d) 

@@ -1,7 +1,11 @@
 #include "reader/reader.h"
 
-// int argc, char const *argv[]
-int main()
+using namespace std;
+
+int main(int argc, char const *argv[])
 {
+    cout << argc << endl;
+    Reader::create(argv[2]);
+    Reader::instance->read();
     return 0;
 }
