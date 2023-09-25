@@ -1,4 +1,5 @@
 #include "reader/reader.h"
+#include "solution/solution.h"
 
 using namespace std;
 
