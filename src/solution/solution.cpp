@@ -7,7 +7,7 @@ using namespace std;
 Solution *Solution::build()
 {
     Solution *solution = new Solution();
-    // int v = Reader::instance->getMAxVehiclesQuantity();
+    int maxVehicles = Reader::instance->getMAxVehiclesQuantity();
 
     return solution;
 }
