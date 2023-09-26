@@ -4,7 +4,8 @@
 #include <iostream>
 #include <string>
 
-class Reader {
+class Reader
+{
 private:
   int dimension;     // n
   int maxVehicles;   // k
@@ -17,14 +18,15 @@ private:
   double **distances;
 
   std::string instancePath;
+  int argCount;
 
 public:
-  Reader(std::string path);
+  Reader(int count, std::string path);
   ~Reader();
 
   static Reader *instance;
 
-  static void create(std::string path);
+  static void create(int count, std::string path);
 
   void read();
 

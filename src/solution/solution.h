@@ -7,26 +7,19 @@
 class Solution
 {
 private:
-    double cost = 0;
-    int vehicles = 0;
-    std::vector<std::vector<int>> sequence; // (k + 1) x (n + 1)
+    double cost;
+    int vehicles;
+    std::vector<std::vector<int>> sequence; // (k + 1) x (n + 2)
+    std::vector<int> capacities;            // quanto da capacidade de cada veículo voi utilizada;
 
 public:
     Solution(/* args */);
     ~Solution();
-    static Solution *build();
+    void build();
     void setCost(double cost);
     void setVehicles(int vehicles);
     inline void setSequence(std::vector<std::vector<int>> *sequence);
     void resume();
 };
-
-Solution::Solution(/* args */)
-{
-}
-
-Solution::~Solution()
-{
-}
 
 #endif

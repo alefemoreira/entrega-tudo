@@ -5,8 +5,7 @@ using namespace std;
 
 int main(int argc, char const *argv[])
 {
-    cout << argc << endl;
-    Reader::create(argv[2]);
+    Reader::create(argc, argv[2]);
     Reader::instance->read();
     return 0;
 }

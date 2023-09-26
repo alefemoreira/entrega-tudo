@@ -4,26 +4,33 @@
 
 using namespace std;
 
-Reader::Reader(std::string path) { this->instancePath = path; }
+Reader::Reader(int count, std::string path)
+{
+  this->argCount = count;
+  this->instancePath = path;
+}
 Reader::~Reader() {}
 
 Reader *Reader::instance = nullptr;
 
-void Reader::create(std::string path) {
+void Reader::create(int count, std::string path)
+{
   if (instance == nullptr)
-    Reader::instance = new Reader(path);
+    Reader::instance = new Reader(count, path);
 }
 
-void Reader::read() { 
-    ifstream in(this->instancePath, ios::in);
-    string file;
-    
-    if(!in) {
-        cout << "File not found";
-        exit(1);
-    }
+void Reader::read()
+{
+  ifstream in(this->instancePath, ios::in);
+  string file;
 
-    // if
+  if (!in)
+  {
+    cout << "File not found" << endl;
+    exit(1);
+  }
 
-    // this->distances = new double*[n]
- }
+  // if
+
+  // this->distances = new double*[n]
+}

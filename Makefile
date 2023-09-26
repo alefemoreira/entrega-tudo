@@ -17,7 +17,7 @@ BUILD := build
 # Library search directories and flags
 EXT_LIB :=
 LDFLAGS :=
-LDPATHS := $(addprefix -L,$(LIB) $(EXT_LIB))
+LDPATHS := #$(addprefix -L,$(LIB) $(EXT_LIB))
 
 # Include directories
 INC_DIRS := $(INC) $(shell find $(SRC) -type d) 
