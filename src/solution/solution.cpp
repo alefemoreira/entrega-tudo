@@ -130,3 +130,11 @@ void Solution::resume()
         cout << endl;
     }
 }
+
+void Solution::localSearch()
+{
+    // remover depois
+    this->~Solution();
+    this->build();
+    this->resume();
+}

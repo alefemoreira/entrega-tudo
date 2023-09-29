@@ -20,6 +20,7 @@ public:
     void setVehicles(int vehicles);
     inline void setSequence(std::vector<std::vector<int>> *sequence);
     void resume();
+    void localSearch();
 };
 
 #endif
