@@ -32,8 +32,8 @@ public:
   void showInstance();
 
   inline double getDistante(int i, int j) { return this->distances[i][j]; }
-  inline int getDemand(int i) { return this->demands[i]; }
-  inline double getOutsourcing(int i) { return this->outsourcing[i]; }
+  inline int getDemand(int i) { return this->demands[i - 1]; }
+  inline double getOutsourcing(int i) { return this->outsourcing[i - 1]; }
   inline int getCarCapacity() { return this->carCapacity; }
   inline int getDimension() { return this->dimension; }
   inline int getMAxVehiclesQuantity() { return this->maxVehicles; }
