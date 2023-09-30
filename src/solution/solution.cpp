@@ -7,6 +7,7 @@ using namespace std;
 
 void Solution::build()
 {
+  this->cost = 0;
   int n = Reader::instance->getDimension();
   int k = Reader::instance->getMAxVehiclesQuantity();
   int l = Reader::instance->getMinimumDelivery();
@@ -29,30 +30,42 @@ void Solution::build()
   while (!not_visited.empty())
   {
     int better_sequence = 0;
+    int better_demand = 0;
     int better_point = 0;
-    int better_cost = 0;
+    int better_index = 0;
+    int better_cost = INFINITY;
     int visited = 0;
 
     for (int i = 0; i < not_visited.size(); i++)
     {
       int vi = not_visited[i];
-      int demand = Reader::instance->getDemand(vi);
-      for (int j = 0; j < k + 1; j++) // veiculos
+      for (int j = 0; j < k; j++) // veiculos
       {
-        double cost = this.getCost(i, j);
+        double cost = this->getCost(vi, j);
         if (cost < better_cost)
         {
           better_cost = cost;
           better_point = vi;
+          better_index = i;
+          better_demand = Reader::instance->getDemand(vi);
           better_sequence = j;
         }
       }
     }
 
     // Atualizando a solução
-    this->sequence[better_sequence].push_back(not_visited[better_sequence]);
-    not_visited.erase(not_visited.begin() + better_point);
+    this->sequence[better_sequence].push_back(better_point);
+    not_visited.erase(not_visited.begin() + better_index);
     visited += 1;
+
+    this->cost += better_cost;
+    if (better_sequence < this->vehicles)
+      this->capacities[better_sequence] += better_demand;
+
+    if (visited >= l && k <= this->vehicles)
+    {
+      k++;
+    }
   }
 }
 
@@ -62,7 +75,7 @@ Solution::Solution(/* args */)
   int n = Reader::instance->getDimension();
   this->cost = 0;
   this->vehicles = 0;
-  this->sequence = vector<vector<int>>(k + 1, vector<int>(0, n + 2));
+  this->sequence = vector<vector<int>>(k + 1, vector<int>());
   this->capacities = vector<int>(k, 0);
 }
 
@@ -81,13 +94,16 @@ double Solution::getCost(int vi, int j)
 {
   if (j == this->vehicles)
   {
-    return Reader::instance->getOutsourcing(vi);
+    double r = Reader::instance->getCarUseCost();
+    double cost = this->capacities[j] == 0 ? r : 0;
+    cost += Reader::instance->getOutsourcing(vi);
+    return cost;
   }
   else
   {
     int demand = Reader::instance->getDemand(vi);
     int last = this->sequence[j].back();
-    int cost = Reader::instance->getDistante(last, vi);
+    int cost = Reader::instance->getDistance(last, vi);
     int maxDemand = Reader::instance->getCarCapacity();
 
     if (this->capacities[j] + demand >= maxDemand)
@@ -114,7 +130,7 @@ void Solution::resume()
       cout << "Pontos de entrega tercerizados: " << endl;
     }
 
-    for (size_t j = 0; j < this->sequence.size(); j++)
+    for (size_t j = 0; j < this->sequence[i].size(); j++)
     {
       cout << " " << this->sequence[i][j] << " ";
     }

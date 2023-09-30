@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 
+#define INFINITY 99999999
+
 class Reader
 {
 private:
@@ -31,7 +33,7 @@ public:
   void read();
   void showInstance();
 
-  inline double getDistante(int i, int j) { return this->distances[i][j]; }
+  inline double getDistance(int i, int j) { return this->distances[i][j]; }
   inline int getDemand(int i) { return this->demands[i - 1]; }
   inline double getOutsourcing(int i) { return this->outsourcing[i - 1]; }
   inline int getCarCapacity() { return this->carCapacity; }
