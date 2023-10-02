@@ -12,6 +12,8 @@ private:
     std::vector<std::vector<int>> sequence; // (k + 1) x (n + 2)
     std::vector<int> capacities;            // quanto da capacidade de cada veículo voi utilizada;
 
+    void bestImprovementReinsertionVehicles();
+    void reinsertion(int k1, int i, int k2, int j);
 public:
     Solution(/* args */);
     ~Solution();
