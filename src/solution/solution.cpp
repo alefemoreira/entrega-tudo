@@ -12,8 +12,9 @@ void Solution::build()
   int k = Reader::instance->getMaxVehiclesQuantity();
   int l = Reader::instance->getMinimumDelivery();
 
-  int maxVehicles = Reader::instance->getMaxVehiclesQuantity();
+  int maxVehicles = k;
   int maxVehicleCapacity = Reader::instance->getCarCapacity();
+  int visited = 0;
 
   // Pontos não visitados
   vector<int> not_visited;
@@ -33,8 +34,7 @@ void Solution::build()
     int better_demand = 0;
     int better_point = 0;
     int better_index = 0;
-    int better_cost = INFINITY;
-    int visited = 0;
+    int better_cost = INFINITE;
 
     for (int i = 0; i < not_visited.size(); i++)
     {
@@ -42,6 +42,7 @@ void Solution::build()
       for (int j = 0; j < k; j++) // veiculos
       {
         double cost = this->getCost(vi, j);
+
         if (cost < better_cost)
         {
           better_cost = cost;
@@ -58,14 +59,23 @@ void Solution::build()
     not_visited.erase(not_visited.begin() + better_index);
     visited += 1;
 
+    cout << "---" <<  better_cost << " " << better_point << endl;
+
     this->cost += better_cost;
-    if (better_sequence < this->vehicles)
+    if (better_sequence < maxVehicles)
       this->capacities[better_sequence] += better_demand;
 
-    if (visited >= l && k <= this->vehicles)
+    if (visited >= l && k <= maxVehicles)
     {
       k++;
     }
+  }
+
+  for (int i = 0; i < maxVehicles; i++)
+  {
+    int back = this->sequence[i].back();
+    this->cost += Reader::instance->getDistance(back, 0);
+    this->sequence[i].push_back(0);
   }
 }
 
@@ -81,7 +91,17 @@ Solution::Solution(/* args */)
 
 Solution::~Solution() {}
 
-void Solution::bestImprovementReinsertionVehicles()
+void Solution::vnd()
+{
+  bool improved = false;
+
+  do
+  {
+    improved = this->bestImprovementReinsertionVehicles();
+  } while (improved);
+}
+
+bool Solution::bestImprovementReinsertionVehicles()
 {
   int bestI, bestJ, bestK1, bestK2;
   int bestDelta = 0;
@@ -94,13 +114,13 @@ void Solution::bestImprovementReinsertionVehicles()
   {
     for (int k2 = k1; k2 < vehicles; k2++)
     {
-      for (int i = 0; i < this->sequence[k1].size() - 1; i++)
+      for (int i = 1; i < this->sequence[k1].size() - 1; i++)
       {
         int vi = this->sequence[k1][i];
         int viPrev = this->sequence[k1][i - 1];
         int viNext = this->sequence[k1][i + 1];
 
-        int j = 0;
+        int j = 1;
         if (k1 == k2)
           j = i + 1;
 
@@ -142,10 +162,13 @@ void Solution::bestImprovementReinsertionVehicles()
     this->capacities[bestK1] -= demand;
     this->capacities[bestK2] += demand;
     this->reinsertion(bestK1, bestI, bestK2, bestJ);
+    return true;
   }
+  return false;
 }
 
-void Solution::reinsertion(int k1, int i, int k2, int j) {
+void Solution::reinsertion(int k1, int i, int k2, int j)
+{
   int v = this->sequence[k1][i];
   auto k1Begin = this->sequence[k1].begin();
   auto k2Begin = this->sequence[k2].begin();
@@ -164,23 +187,26 @@ void Solution::setSequence(vector<vector<int>> *sequence)
 
 double Solution::getCost(int vi, int j)
 {
-  if (j == this->vehicles)
+  int maxVehicles = Reader::instance->getMaxVehiclesQuantity();
+
+  if (j == maxVehicles)
   {
-    double r = Reader::instance->getCarUseCost();
-    double cost = this->capacities[j] == 0 ? r : 0;
-    cost += Reader::instance->getOutsourcing(vi);
+    double cost = Reader::instance->getOutsourcing(vi);
     return cost;
   }
   else
   {
     int demand = Reader::instance->getDemand(vi);
     int last = this->sequence[j].back();
-    int cost = Reader::instance->getDistance(last, vi);
     int maxDemand = Reader::instance->getCarCapacity();
+
+    double r = Reader::instance->getCarUseCost();
+    double cost = this->capacities[j] == 0 ? r : 0;
+    cost += Reader::instance->getDistance(last, vi);
 
     if (this->capacities[j] + demand >= maxDemand)
     {
-      return INFINITY;
+      return INFINITE;
     }
 
     return cost;

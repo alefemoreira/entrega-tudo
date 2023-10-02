@@ -10,6 +10,9 @@ int main(int argc, char **argv)
     Solution s;
     s.build();
     s.resume();
+    cout << endl;
+    s.vnd();
+    s.resume();
     
     return 0;
 }

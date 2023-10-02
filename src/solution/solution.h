@@ -14,11 +14,12 @@ private:
     double getCost(int i, int j);
 
 
-    void bestImprovementReinsertionVehicles();
+    bool bestImprovementReinsertionVehicles();
     void reinsertion(int k1, int i, int k2, int j);
 public:
     Solution(/* args */);
     ~Solution();
+    void vnd();
     void build();
     void setCost(double cost);
     void setVehicles(int vehicles);

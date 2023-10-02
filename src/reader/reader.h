@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-#define INFINITY 99999999
+#define INFINITE 99999999
 
 class Reader
 {
