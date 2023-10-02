@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 
+#define INFINITY 99999999
+
 class Reader
 {
 private:
