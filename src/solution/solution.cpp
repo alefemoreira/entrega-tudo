@@ -8,7 +8,7 @@ using namespace std;
 void Solution::build()
 {
   int n = Reader::instance->getDimension();
-  int k = Reader::instance->getMAxVehiclesQuantity();
+  int k = Reader::instance->getMaxVehiclesQuantity();
 
   vector<vector<int>> g(n, vector<int>(n));
 
@@ -20,7 +20,7 @@ void Solution::build()
       {20, 18, 21, 1, 0},
   };
 
-  int maxVehicles = Reader::instance->getMAxVehiclesQuantity();
+  int maxVehicles = Reader::instance->getMaxVehiclesQuantity();
   int maxVehicleCapacity = Reader::instance->getCarCapacity();
 
   // Pontos não visitados
@@ -89,7 +89,7 @@ void Solution::build()
 
 Solution::Solution(/* args */)
 {
-  int k = Reader::instance->getMAxVehiclesQuantity();
+  int k = Reader::instance->getMaxVehiclesQuantity();
   int n = Reader::instance->getDimension();
   this->cost = 0;
   this->vehicles = 0;
@@ -98,6 +98,78 @@ Solution::Solution(/* args */)
 }
 
 Solution::~Solution() {}
+
+void Solution::bestImprovementReinsertionVehicles()
+{
+  int bestI, bestJ, bestK1, bestK2;
+  int bestDelta = 0;
+  int vehicles = Reader::instance->getMaxVehiclesQuantity();
+  double r = Reader::instance->getCarUseCost();
+  int Q = Reader::instance->getCarCapacity();
+  // int dimension = this->
+
+  for (int k1 = 0; k1 < vehicles; k1++)
+  {
+    for (int k2 = k1; k2 < vehicles; k2++)
+    {
+      for (int i = 0; i < this->sequence[k1].size() - 1; i++)
+      {
+        int vi = this->sequence[k1][i];
+        int viPrev = this->sequence[k1][i - 1];
+        int viNext = this->sequence[k1][i + 1];
+
+        int j = 0;
+        if (k1 == k2)
+          j = i + 1;
+
+        for (; j < this->sequence[k2].size() - 1; j++)
+        {
+          int vj = this->sequence[k2][j];
+          int vjNext = this->sequence[k2][j + 1];
+
+          if (Reader::instance->getDemand(vi) + this->capacities[k2] > Q)
+            continue;
+
+          double delta = Reader::instance->getDistance(vi, vjNext) + Reader::instance->getDistance(vj, vi) +
+                         Reader::instance->getDistance(viPrev, viNext) -
+                         Reader::instance->getDistance(viPrev, vi) - Reader::instance->getDistance(vi, viNext) -
+                         Reader::instance->getDistance(vj, vjNext);
+
+          if (this->sequence[k2].size() == 2)
+            delta += r;
+
+          if (this->sequence[k1].size() == 3)
+            delta -= r;
+
+          if (delta < bestDelta)
+          {
+            bestDelta = delta;
+            bestI = i;
+            bestJ = j;
+            bestK1 = k1;
+            bestK2 = k2;
+          }
+        }
+      }
+    }
+  }
+  if (bestDelta < 0)
+  {
+    this->cost -= bestDelta;
+    int demand = Reader::instance->getDemand(this->sequence[bestK1][bestI]);
+    this->capacities[bestK1] -= demand;
+    this->capacities[bestK2] += demand;
+    this->reinsertion(bestK1, bestI, bestK2, bestJ);
+  }
+}
+
+void Solution::reinsertion(int k1, int i, int k2, int j) {
+  int v = this->sequence[k1][i];
+  auto k1Begin = this->sequence[k1].begin();
+  auto k2Begin = this->sequence[k2].begin();
+  this->sequence[k1].erase(k1Begin + i);
+  this->sequence[k2].insert(k2Begin + j, v);
+}
 
 void Solution::setCost(double cost) { this->cost = cost; }
 

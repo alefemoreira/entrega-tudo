@@ -31,12 +31,12 @@ public:
   void read();
   void showInstance();
 
-  inline double getDistante(int i, int j) { return this->distances[i][j]; }
+  inline double getDistance(int i, int j) { return this->distances[i][j]; }
   inline int getDemand(int i) { return this->demands[i - 1]; }
   inline double getOutsourcing(int i) { return this->outsourcing[i - 1]; }
   inline int getCarCapacity() { return this->carCapacity; }
   inline int getDimension() { return this->dimension; }
-  inline int getMAxVehiclesQuantity() { return this->maxVehicles; }
+  inline int getMaxVehiclesQuantity() { return this->maxVehicles; }
   inline double getCarUseCost() { return this->carUseCost; }
   inline int getMinimumDelivery() { return this->minDelivery; }
 };
