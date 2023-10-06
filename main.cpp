@@ -34,6 +34,9 @@ CostSequencies calcCosts(const int &vehicleCost, const vector<vector<int>> &cost
         firstCity = sequencies[line][0];
         lineCost = costs[0][firstCity];
         numberCities = sequencies[line].size();
+        lastCity = sequencies[line][numberCities - 1];
+        lineCost += costs[lastCity][0];
+        lineCost += vehicleCost;
 
         for (int i = 0; i < numberCities; i++)
         {
@@ -46,9 +49,6 @@ CostSequencies calcCosts(const int &vehicleCost, const vector<vector<int>> &cost
             }
         }
 
-        lastCity = sequencies[line][numberCities - 1];
-        lineCost += costs[lastCity][0];
-        lineCost += vehicleCost;
         costSequencies.costPerSequencie.push_back(lineCost);
         costSequencies.costTotal += lineCost;
     }
@@ -58,7 +58,7 @@ CostSequencies calcCosts(const int &vehicleCost, const vector<vector<int>> &cost
 
 int getCost(const vector<vector<int>> &costs, int i, int j, int numMax)
 {
-    if (i >= 0 && j < numMax)
+    if (i > 0 && i <= numMax && j <= numMax && j > 0)
     {
         return costs[i][j];
     }
@@ -66,24 +66,21 @@ int getCost(const vector<vector<int>> &costs, int i, int j, int numMax)
     return 0;
 }
 
-int getCostSequence(vector<int> &sequencieCost)
-{
-    int total = 0;
-    vector<int>::iterator it = sequencieCost.begin();
-
-    for (; it < sequencieCost.end(); it++)
-    {
-        total += *it;
-    }
-
-    return total;
-}
-
-BestNeighbor swapInLine(const vector<vector<int>> &sequencies, const vector<vector<int>> &costs, CostSequencies currentBestCost, int numMax)
+BestNeighbor swapInLine(
+    const vector<vector<int>> &sequencies,
+    const vector<vector<int>> &costs,
+    CostSequencies currentBestCost,
+    int numMax)
 {
     int bestI;
     int bestJ;
+    int bestLine;
+    int addCosts = 0;
+    int removeCosts = 0;
+    int newCost = 0;
     BestNeighbor bestNeighbor;
+    bestNeighbor.bestCost = currentBestCost.costTotal;
+    bestNeighbor.sequencies = sequencies;
 
     for (int line = 0; line < sequencies.size(); line++)
     {
@@ -105,38 +102,50 @@ BestNeighbor swapInLine(const vector<vector<int>> &sequencies, const vector<vect
                 nextJ = next(currentJ);
                 prevJ = prev(currentJ);
 
-                int newCost =
-                    getCost(costs, *prevI, *currentJ, numMax) +
-                    getCost(costs, *currentJ, *nextI, numMax) +
-                    getCost(costs, *prevJ, *currentI, numMax) +
-                    getCost(costs, *currentI, *nextJ, numMax) -
-                    getCost(costs, *prevI, *currentI, numMax) -
-                    getCost(costs, *currentI, *nextI, numMax) -
-                    getCost(costs, *prevJ, *currentJ, numMax) -
-                    getCost(costs, *currentJ, *nextJ, numMax);
+                if (currentI + 1 == currentJ)
+                {
+                    addCosts = getCost(costs, *prevI, *currentJ, numMax) +
+                               getCost(costs, *currentJ, *currentI, numMax) +
+                               getCost(costs, *currentI, *nextJ, numMax);
 
-                newCost = currentBestCost.costPerSequencie[line] + newCost;
+                    removeCosts = getCost(costs, *prevI, *currentI, numMax) +
+                                  getCost(costs, *currentI, *currentJ, numMax) +
+                                  getCost(costs, *currentJ, *nextJ, numMax);
+                }
+                else
+                {
+                    addCosts = getCost(costs, *prevI, *currentJ, numMax) +
+                               getCost(costs, *currentJ, *nextI, numMax) +
+                               getCost(costs, *prevJ, *currentI, numMax) +
+                               getCost(costs, *currentI, *nextJ, numMax);
 
-                if (newCost < currentBestCost.costPerSequencie[line])
+                    removeCosts = getCost(costs, *prevI, *currentI, numMax) +
+                                  getCost(costs, *currentI, *nextI, numMax) +
+                                  getCost(costs, *prevJ, *currentJ, numMax) +
+                                  getCost(costs, *currentJ, *nextJ, numMax);
+                }
+
+                if (newCost < bestNeighbor.bestCost)
                 {
                     bestI = distance(sequencieLine.begin(), currentI);
                     bestJ = distance(sequencieLine.begin(), currentJ);
-
-                    currentBestCost.costPerSequencie[line] = newCost;
-                    int newTotal = getCostSequence(currentBestCost.costPerSequencie);
-
-                    vector<vector<int>> newNeighbor = sequencies;
-                    int aux = newNeighbor[line][bestI];
-                    newNeighbor[line][bestI] = newNeighbor[line][bestJ];
-                    newNeighbor[line][bestJ] = aux;
-
-                    bestNeighbor.bestCost = newTotal;
-                    bestNeighbor.sequencies = newNeighbor;
-
-                    return bestNeighbor;
+                    bestLine = line;
+                    bestNeighbor.bestCost = newCost;
                 }
             }
         }
+    }
+
+    if (bestNeighbor.bestCost < currentBestCost.costTotal)
+    {
+        vector<vector<int>> newNeighbor = sequencies;
+        int aux = newNeighbor[bestLine][bestI];
+        newNeighbor[bestLine][bestI] = newNeighbor[bestLine][bestJ];
+        newNeighbor[bestLine][bestJ] = aux;
+
+        bestNeighbor.sequencies = newNeighbor;
+
+        return bestNeighbor;
     }
 
     bestNeighbor.bestCost = currentBestCost.costTotal;
@@ -145,7 +154,11 @@ BestNeighbor swapInLine(const vector<vector<int>> &sequencies, const vector<vect
     return bestNeighbor;
 }
 
-BestNeighbor vnd(const vector<vector<int>> &costs, const vector<vector<int>> &intialSequencie, const CostSequencies initialCosts, int numMax)
+BestNeighbor vnd(
+    const vector<vector<int>> &costs,
+    const vector<vector<int>> &intialSequencie,
+    const CostSequencies initialCosts,
+    int numMax)
 {
     vector<vector<int>> currentSequencies = intialSequencie;
     CostSequencies currentBestCost = initialCosts;
@@ -196,7 +209,7 @@ BestNeighbor vnd(const vector<vector<int>> &costs, const vector<vector<int>> &in
 int main(int argc, char const *argv[])
 {
     // Exemplo de uso
-    int r = 2;
+    int r = 5;
     int n = 6;
 
     // Tempos de preparo entre produtos (exemplo fictício)
