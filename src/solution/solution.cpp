@@ -57,9 +57,8 @@ void Solution::build()
     // Atualizando a solução
     this->sequence[better_sequence].push_back(better_point);
     not_visited.erase(not_visited.begin() + better_index);
-    visited += 1;
-
-    cout << "---" <<  better_cost << " " << better_point << endl;
+    if (better_sequence < maxVehicles)
+      visited += 1;
 
     this->cost += better_cost;
     if (better_sequence < maxVehicles)
@@ -77,6 +76,8 @@ void Solution::build()
     this->cost += Reader::instance->getDistance(back, 0);
     this->sequence[i].push_back(0);
   }
+
+  this->deliveries = visited;
 }
 
 Solution::Solution(/* args */)
@@ -85,6 +86,7 @@ Solution::Solution(/* args */)
   int n = Reader::instance->getDimension();
   this->cost = 0;
   this->vehicles = 0;
+  this->deliveries = 0;
   this->sequence = vector<vector<int>>(k + 1, vector<int>());
   this->capacities = vector<int>(k, 0);
 }
@@ -112,7 +114,7 @@ bool Solution::bestImprovementReinsertionVehicles()
 
   for (int k1 = 0; k1 < vehicles; k1++)
   {
-    for (int k2 = k1; k2 < vehicles; k2++)
+    for (int k2 = k1 + 1; k2 < vehicles; k2++)
     {
       for (int i = 1; i < this->sequence[k1].size() - 1; i++)
       {
@@ -121,8 +123,8 @@ bool Solution::bestImprovementReinsertionVehicles()
         int viNext = this->sequence[k1][i + 1];
 
         int j = 1;
-        if (k1 == k2)
-          j = i + 1;
+        // if (k1 == k2)
+        //   j = i + 1;
 
         for (; j < this->sequence[k2].size() - 1; j++)
         {
@@ -157,13 +159,27 @@ bool Solution::bestImprovementReinsertionVehicles()
   }
   if (bestDelta < 0)
   {
-    this->cost -= bestDelta;
+    this->cost += bestDelta;
     int demand = Reader::instance->getDemand(this->sequence[bestK1][bestI]);
     this->capacities[bestK1] -= demand;
     this->capacities[bestK2] += demand;
     this->reinsertion(bestK1, bestI, bestK2, bestJ);
     return true;
   }
+  return false;
+}
+
+bool Solution::bestImprovementInsertionOutsourcing()
+{
+  if (this->deliveries == Reader::instance->getMinimumDelivery())
+    return false;
+
+  int bestI, bestJ, bestK1;
+  int bestDelta = 0;
+  int vehicles = Reader::instance->getMaxVehiclesQuantity();
+  double r = Reader::instance->getCarUseCost();
+  int Q = Reader::instance->getCarCapacity();
+
   return false;
 }
 
