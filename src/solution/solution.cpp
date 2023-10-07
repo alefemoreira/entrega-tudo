@@ -59,7 +59,7 @@ void Solution::build()
     not_visited.erase(not_visited.begin() + better_index);
     visited += 1;
 
-    cout << "---" <<  better_cost << " " << better_point << endl;
+    cout << "---" << better_cost << " " << better_point << endl;
 
     this->cost += better_cost;
     if (better_sequence < maxVehicles)
@@ -101,7 +101,7 @@ void Solution::vnd()
   } while (improved);
 }
 
-bool Solution::swapVehicles()
+bool Solution::swapRoutesBetweenVehicles()
 {
   int bestI, bestJ, bestK1, bestK2;
   int bestDelta = 0;
@@ -120,24 +120,21 @@ bool Solution::swapVehicles()
         int viPrev = this->sequence[k1][i - 1];
         int viNext = this->sequence[k1][i + 1];
 
-        
-
         int j = 1;
-        if (k1 == k2)
-          j = i + 1;
-
         for (; j < this->sequence[k2].size() - 1; j++)
         {
           int vj = this->sequence[k2][j];
+          int vjPrev = this->sequence[k2][j - 1];
           int vjNext = this->sequence[k2][j + 1];
 
           if (Reader::instance->getDemand(vi) + this->capacities[k2] > Q)
             continue;
 
-          double delta = Reader::instance->getDistance(vi, vjNext) + Reader::instance->getDistance(vj, vi) +
-                         Reader::instance->getDistance(viPrev, viNext) -
-                         Reader::instance->getDistance(viPrev, vi) - Reader::instance->getDistance(vi, viNext) -
-                         Reader::instance->getDistance(vj, vjNext);
+          double delta = Reader::instance->getDistance(vi, viPrev) + Reader::instance->getDistance(vi, viNext) +
+                         Reader::instance->getDistance(vj, vjPrev) + Reader::instance->getDistance(vj, vjNext) -
+                         Reader::instance->getDistance(vj, viPrev) + Reader::instance->getDistance(vj, viNext) -
+                         Reader::instance->getDistance(vi, vjPrev) + Reader::instance->getDistance(vi, vjNext);
+          ;
 
           if (this->sequence[k2].size() == 2)
             delta += r;
@@ -157,14 +154,23 @@ bool Solution::swapVehicles()
       }
     }
   }
+
   if (bestDelta < 0)
   {
-    this->cost -= bestDelta;
-    int demand = Reader::instance->getDemand(this->sequence[bestK1][bestI]);
-    this->capacities[bestK1] -= demand;
-    this->capacities[bestK2] += demand;
-    this->reinsertion(bestK1, bestI, bestK2, bestJ);
-    return true;
+    // Verificando as capacidades dos veiculos
+    int demand1 = Reader::instance->getDemand(this->sequence[bestK1][bestI]);
+    int demand2 = Reader::instance->getDemand(this->sequence[bestK2][bestJ]);
+    int maxVehicleCapacity = Reader::instance->getCarCapacity();
+    bool isAproved = ((this->capacities[bestK1] - demand1 + demand2) <= maxVehicleCapacity) && ((this->capacities[bestK2] - demand2 + demand1) <= maxVehicleCapacity);
+
+    if (isAproved)
+    {
+      this->cost -= bestDelta;
+      this->capacities[bestK1] -= demand1 + demand2;
+      this->capacities[bestK2] += demand2 + demand1;
+      this->swapElementsBetweenArrays(bestK1, bestI, bestK2, bestJ);
+      return true;
+    }
   }
   return false;
 }
@@ -225,7 +231,8 @@ bool Solution::bestImprovementReinsertionVehicles()
   }
   if (bestDelta < 0)
   {
-    this->cost -= bestDelta;
+    this->cost += bestDelta;
+
     int demand = Reader::instance->getDemand(this->sequence[bestK1][bestI]);
     this->capacities[bestK1] -= demand;
     this->capacities[bestK2] += demand;
@@ -235,6 +242,13 @@ bool Solution::bestImprovementReinsertionVehicles()
   return false;
 }
 
+void Solution::swapElementsBetweenArrays(int k1, int i, int k2, int j)
+{
+  int temp = this->sequence[k1][i];
+  this->sequence[k1][i] = this->sequence[k2][j];
+  this->sequence[k2][j] = temp;
+}
+
 void Solution::reinsertion(int k1, int i, int k2, int j)
 {
   int v = this->sequence[k1][i];
@@ -242,14 +256,6 @@ void Solution::reinsertion(int k1, int i, int k2, int j)
   auto k2Begin = this->sequence[k2].begin();
   this->sequence[k1].erase(k1Begin + i);
   this->sequence[k2].insert(k2Begin + j, v);
-}
-
-void Solution::swap(int k1, int i, int k2, int j)
-{
-  int n = this->sequence[k1][i];
-  this->sequence[k1][i] = this->sequence[k2][j];
-  this->sequence[k2][j] = n;
-
 }
 
 void Solution::setCost(double cost) { this->cost = cost; }

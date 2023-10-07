@@ -15,9 +15,9 @@ private:
 
 
     bool bestImprovementReinsertionVehicles();
-    bool swapVehicles();
+    bool swapRoutesBetweenVehicles();
     void reinsertion(int k1, int i, int k2, int j);
-    void swap(int k1, int i, int k2, int j);
+    void swapElementsBetweenArrays(int k1, int i, int k2, int j);
 public:
     Solution(/* args */);
     ~Solution();
