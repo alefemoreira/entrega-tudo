@@ -101,7 +101,7 @@ void Solution::vnd()
   } while (improved);
 }
 
-bool Solution::swapRoutesBetweenVehicles()
+bool Solution::bestImprovementSwapVehicles()
 {
   int bestI, bestJ, bestK1, bestK2;
   int bestDelta = 0;
