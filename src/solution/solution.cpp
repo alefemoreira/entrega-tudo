@@ -5,83 +5,82 @@
 
 using namespace std;
 
-void Solution::build()
-{
+void Solution::build() {
   this->cost = 0;
   int n = Reader::instance->getDimension();
-  int k = Reader::instance->getMaxVehiclesQuantity();
+  int K = Reader::instance->getMaxVehiclesQuantity();
   int l = Reader::instance->getMinimumDelivery();
 
-  int maxVehicles = k;
+  int maxVehicles = K;
   int maxVehicleCapacity = Reader::instance->getCarCapacity();
-  int visited = 0;
+  this->deliveries = 0;
+  this->vehicles = 0;
 
   // Pontos não visitados
-  vector<int> not_visited;
-  for (int i = 1; i <= n; i++)
-  {
-    not_visited.push_back(i);
+  vector<int> candidates;
+  for (int i = 1; i <= n; i++) {
+    candidates.push_back(i);
   }
 
-  for (int i = 0; i < k; i++)
-  {
+  for (int i = 0; i < K; i++) {
     this->sequence[i].push_back(0);
   }
 
-  while (!not_visited.empty())
-  {
-    int better_sequence = 0;
-    int better_demand = 0;
-    int better_point = 0;
-    int better_index = 0;
-    int better_cost = INFINITE;
+  while (!candidates.empty()) {
+    int betterK = 0;
+    int demand = 0;
+    int betterVertice = 0;
+    int betterI = 0;
+    double betterCost = INFINITE;
 
-    for (int i = 0; i < not_visited.size(); i++)
-    {
-      int vi = not_visited[i];
-      for (int j = 0; j < k; j++) // veiculos
+    for (int i = 0; i < candidates.size(); i++) {
+      int vi = candidates[i];
+      double viDemand = Reader::instance->getDemand(vi);
+
+      for (int k = 0; k < K; k++) // veiculos
       {
-        double cost = this->getCost(vi, j);
+        double cost = this->getCost(vi, k, viDemand);
 
-        if (cost < better_cost)
-        {
-          better_cost = cost;
-          better_point = vi;
-          better_index = i;
-          better_demand = Reader::instance->getDemand(vi);
-          better_sequence = j;
+        if (cost < betterCost) {
+          betterCost = cost;
+          betterVertice = vi;
+          betterI = i;
+          demand = viDemand;
+          betterK = k;
         }
       }
     }
 
     // Atualizando a solução
-    this->sequence[better_sequence].push_back(better_point);
-    not_visited.erase(not_visited.begin() + better_index);
-    if (better_sequence < maxVehicles)
-      visited += 1;
+    this->sequence[betterK].push_back(betterVertice);
 
-    this->cost += better_cost;
-    if (better_sequence < maxVehicles)
-      this->capacities[better_sequence] += better_demand;
+    candidates.erase(candidates.begin() + betterI);
 
-    if (visited >= l && k <= maxVehicles)
-    {
-      k++;
+    this->cost += betterCost;
+
+    if (betterK < maxVehicles) {
+      this->deliveries += 1;
+
+      if (this->capacities[betterK] == 0) {
+        this->vehicles++;
+      }
+
+      this->capacities[betterK] += demand;
+    }
+
+    if (this->deliveries >= l && K <= maxVehicles) {
+      K++;
     }
   }
 
-  for (int i = 0; i < maxVehicles; i++)
-  {
+  for (int i = 0; i < maxVehicles; i++) {
     int back = this->sequence[i].back();
     this->cost += Reader::instance->getDistance(back, 0);
     this->sequence[i].push_back(0);
   }
-
-  this->deliveries = visited;
 }
 
-Solution::Solution(/* args */)
-{
+Solution::Solution(/* args */) {
   int k = Reader::instance->getMaxVehiclesQuantity();
   int n = Reader::instance->getDimension();
   this->cost = 0;
@@ -93,18 +92,16 @@ Solution::Solution(/* args */)
 
 Solution::~Solution() {}
 
-void Solution::vnd()
-{
+void Solution::vnd() {
   bool improved = false;
 
-  do
-  {
+  do {
     improved = this->bestImprovementReinsertionVehicles();
+    cout << cost << endl;
   } while (improved);
 }
 
-bool Solution::swapVehicles()
-{
+bool Solution::swapVehicles() {
   int bestI, bestJ, bestK1, bestK2;
   int bestDelta = 0;
   int vehicles = Reader::instance->getMaxVehiclesQuantity();
@@ -112,33 +109,29 @@ bool Solution::swapVehicles()
   int Q = Reader::instance->getCarCapacity();
   // int dimension = this->
 
-  for (int k1 = 0; k1 < vehicles; k1++)
-  {
-    for (int k2 = k1; k2 < vehicles; k2++)
-    {
-      for (int i = 1; i < this->sequence[k1].size() - 1; i++)
-      {
+  for (int k1 = 0; k1 < vehicles; k1++) {
+    for (int k2 = k1; k2 < vehicles; k2++) {
+      for (int i = 1; i < this->sequence[k1].size() - 1; i++) {
         int vi = this->sequence[k1][i];
         int viPrev = this->sequence[k1][i - 1];
         int viNext = this->sequence[k1][i + 1];
-
-        
 
         int j = 1;
         if (k1 == k2)
           j = i + 1;
 
-        for (; j < this->sequence[k2].size() - 1; j++)
-        {
+        for (; j < this->sequence[k2].size() - 1; j++) {
           int vj = this->sequence[k2][j];
           int vjNext = this->sequence[k2][j + 1];
 
           if (Reader::instance->getDemand(vi) + this->capacities[k2] > Q)
             continue;
 
-          double delta = Reader::instance->getDistance(vi, vjNext) + Reader::instance->getDistance(vj, vi) +
+          double delta = Reader::instance->getDistance(vi, vjNext) +
+                         Reader::instance->getDistance(vj, vi) +
                          Reader::instance->getDistance(viPrev, viNext) -
-                         Reader::instance->getDistance(viPrev, vi) - Reader::instance->getDistance(vi, viNext) -
+                         Reader::instance->getDistance(viPrev, vi) -
+                         Reader::instance->getDistance(vi, viNext) -
                          Reader::instance->getDistance(vj, vjNext);
 
           if (this->sequence[k2].size() == 2)
@@ -147,8 +140,7 @@ bool Solution::swapVehicles()
           if (this->sequence[k1].size() == 3)
             delta -= r;
 
-          if (delta < bestDelta)
-          {
+          if (delta < bestDelta) {
             bestDelta = delta;
             bestI = i;
             bestJ = j;
@@ -159,8 +151,7 @@ bool Solution::swapVehicles()
       }
     }
   }
-  if (bestDelta < 0)
-  {
+  if (bestDelta < 0) {
     this->cost -= bestDelta;
     int demand = Reader::instance->getDemand(this->sequence[bestK1][bestI]);
     this->capacities[bestK1] -= demand;
@@ -171,124 +162,230 @@ bool Solution::swapVehicles()
   return false;
 }
 
-bool Solution::bestImprovementReinsertionVehicles()
-{
-  int bestI, bestJ, bestK1, bestK2;
-  int bestDelta = 0;
-  int vehicles = Reader::instance->getMaxVehiclesQuantity();
+bool Solution::bestImprovementReinsertionVehicles() {
+  int bestI, bestJ, bestK, bestL, demand;
+  double bestDelta = 0;
+
+  int vehicles = this->sequence.size() - 1;
   double r = Reader::instance->getCarUseCost();
   int Q = Reader::instance->getCarCapacity();
-  // int dimension = this->
 
-  for (int k1 = 0; k1 < vehicles; k1++)
-  {
-    for (int k2 = k1 + 1; k2 < vehicles; k2++)
-    {
-      for (int i = 1; i < this->sequence[k1].size() - 1; i++)
-      {
-        int vi = this->sequence[k1][i];
-        int viPrev = this->sequence[k1][i - 1];
-        int viNext = this->sequence[k1][i + 1];
+  for (int k = 0; k < vehicles; k++) {
+    for (int i = 1; i < this->sequence[k].size() - 1; i++) {
+      int vi = this->sequence[k][i];
+      int viPrev = this->sequence[k][i - 1];
+      int viNext = this->sequence[k][i + 1];
+      int viDemand = Reader::instance->getDemand(vi);
 
-        int j = 1;
-        // if (k1 == k2)
-        //   j = i + 1;
+      double costViViNext = Reader::instance->getDistance(vi, viNext);
+      double costViPrevVi = Reader::instance->getDistance(viPrev, vi);
+      double costViPrevViNext = Reader::instance->getDistance(viPrev, viNext);
 
-        for (; j < this->sequence[k2].size() - 1; j++)
-        {
-          int vj = this->sequence[k2][j];
-          int vjNext = this->sequence[k2][j + 1];
+      for (int l = 0; l < vehicles; l++) {
+        if (k == l || viDemand + this->capacities[l] > Q)
+          continue;
 
-          if (Reader::instance->getDemand(vi) + this->capacities[k2] > Q)
-            continue;
+        for (int j = 1; j < this->sequence[l].size() - 1; j++) {
+          int vj = this->sequence[l][j];
+          int vjNext = this->sequence[l][j + 1];
 
-          double delta = Reader::instance->getDistance(vi, vjNext) + Reader::instance->getDistance(vj, vi) +
-                         Reader::instance->getDistance(viPrev, viNext) -
-                         Reader::instance->getDistance(viPrev, vi) - Reader::instance->getDistance(vi, viNext) -
+          double delta = Reader::instance->getDistance(vi, vjNext) +
+                         Reader::instance->getDistance(vj, vi) +
+                         costViPrevViNext - costViPrevVi - costViViNext -
                          Reader::instance->getDistance(vj, vjNext);
 
-          if (this->sequence[k2].size() == 2)
+          if (this->capacities[l] == 0)
             delta += r;
 
-          if (this->sequence[k1].size() == 3)
+          if (this->capacities[k] - viDemand == 0)
             delta -= r;
 
-          if (delta < bestDelta)
-          {
+          if (delta < bestDelta) {
             bestDelta = delta;
+            demand = viDemand;
             bestI = i;
             bestJ = j;
-            bestK1 = k1;
-            bestK2 = k2;
+            bestK = k;
+            bestL = l;
           }
         }
       }
     }
   }
-  if (bestDelta < 0)
-  {
+
+  if (bestDelta < 0) {
+    cout << bestK << ", " << bestI << ", " << bestL << ", " << bestJ << endl;
     this->cost += bestDelta;
-    int demand = Reader::instance->getDemand(this->sequence[bestK1][bestI]);
-    this->capacities[bestK1] -= demand;
-    this->capacities[bestK2] += demand;
-    this->reinsertion(bestK1, bestI, bestK2, bestJ);
+    this->capacities[bestK] -= demand;
+    this->capacities[bestL] += demand;
+    this->reinsertion(bestK, bestI, bestL, bestJ);
+    exit(0);
     return true;
   }
   return false;
 }
 
-bool Solution::bestImprovementInsertionOutsourcing()
-{
+/*
+O()?
+remover demand do carro k
+*/
+bool Solution::bestImprovementInsertionOutsourcing() {
   if (this->deliveries == Reader::instance->getMinimumDelivery())
     return false;
 
-  int bestI, bestJ, bestK1;
-  int bestDelta = 0;
-  int vehicles = Reader::instance->getMaxVehiclesQuantity();
+  int bestI, bestK, demand;
+  double bestDelta = 0;
+
   double r = Reader::instance->getCarUseCost();
-  int Q = Reader::instance->getCarCapacity();
+
+  for (int k = 0; k < this->sequence.size() - 1; k++) {
+    for (int i = 1; i < this->sequence[k].size() - 1; i++) {
+      int viPrev = this->sequence[k][i - 1];
+      int vi = this->sequence[k][i];
+      int viNext = this->sequence[k][i + 1];
+
+      double delta = Reader::instance->getDistance(viPrev, viNext) +
+                     Reader::instance->getOutsourcing(vi) -
+                     Reader::instance->getDistance(viPrev, vi) -
+                     Reader::instance->getDistance(vi, viNext);
+
+      if (this->sequence[k].size() == 3) {
+        delta -= r;
+      }
+
+      if (delta < bestDelta) {
+        bestI = i;
+        bestK = k;
+        bestDelta = delta;
+      }
+    }
+  }
+
+  if (bestDelta < 0) {
+    this->cost += bestDelta;
+    this->deliveries--;
+    this->peformsReinsertionOutsourcing(bestK, bestI);
+    return true;
+  }
 
   return false;
 }
 
-void Solution::reinsertion(int k1, int i, int k2, int j)
-{
-  int v = this->sequence[k1][i];
-  auto k1Begin = this->sequence[k1].begin();
-  auto k2Begin = this->sequence[k2].begin();
-  this->sequence[k1].erase(k1Begin + i);
-  this->sequence[k2].insert(k2Begin + j, v);
+/*
+O()?
+*/
+bool Solution::bestImprovementRemovalOutsourcing() {
+  if (this->deliveries == Reader::instance->getMinimumDelivery())
+    return false;
+
+  int bestI, bestK, bestJ, demand;
+  double bestDelta = 0;
+
+  double r = Reader::instance->getCarUseCost();
+  int Q = Reader::instance->getCarCapacity();
+  int o = Reader::instance->getMaxVehiclesQuantity();
+
+  for (int i = 0; i < this->sequence[o].size(); i++) {
+    int vi = this->sequence[o][i];
+    int viDemand = Reader::instance->getDemand(vi);
+
+    double viOutsourcingCost = Reader::instance->getOutsourcing(vi);
+
+    for (int k = 0; k < this->sequence.size() - 1; k++) {
+      if (this->capacities[k] + viDemand > Q)
+        continue;
+
+      for (int j = 1; j < this->sequence[k].size() - 1; j++) {
+        int vj = this->sequence[k][j];
+        int vjNext = this->sequence[k][j + 1];
+
+        double delta = Reader::instance->getDistance(vj, vi) +
+                       Reader::instance->getDistance(vi, vjNext) -
+                       viOutsourcingCost -
+                       Reader::instance->getDistance(vj, vjNext);
+
+        if (this->sequence[k].size() == 2) {
+          // como i será inserido no veiculo k, é necessário verificar se
+          // o veiculo está ou não em uso, pois se não estiver o custo por
+          // usar o carro precisa ser somado ao delta
+          delta += r;
+        }
+
+        if (delta < bestDelta) {
+          bestJ = j;
+          bestI = i;
+          bestK = k;
+          demand = viDemand;
+          bestDelta = delta;
+        }
+      }
+    }
+  }
+
+  if (bestDelta < 0) {
+    this->cost += bestDelta;
+    this->deliveries++;
+    this->capacities[bestK] += demand;
+    this->peformsRemovalOutsourcing(bestI, bestK, bestJ);
+    return true;
+  }
+
+  return false;
 }
 
-void Solution::swap(int k1, int i, int k2, int j)
-{
+void Solution::peformsReinsertionOutsourcing(int k, int i) {
+  auto begin = this->sequence[k].begin();
+  int vi = this->sequence[k][i];
+
+  int o = Reader::instance->getMaxVehiclesQuantity();
+  this->sequence[k].erase(begin + i);
+  this->sequence[o].push_back(vi);
+
+  this->capacities[k] -= Reader::instance->getDemand(vi);
+}
+
+void Solution::peformsRemovalOutsourcing(int i, int k, int j) {
+  int o = Reader::instance->getMaxVehiclesQuantity();
+  int vi = this->sequence[o][i];
+
+  auto outsourcingBegin = this->sequence[o].begin();
+  auto kBegin = this->sequence[k].begin();
+
+  this->sequence[o].erase(outsourcingBegin + i);
+  this->sequence[k].insert(kBegin + j, vi);
+}
+
+void Solution::reinsertion(int k, int i, int l, int j) {
+  int v = this->sequence[k][i];
+  auto k1Begin = this->sequence[k].begin();
+  auto k2Begin = this->sequence[l].begin();
+
+  this->sequence[k].erase(k1Begin + i);
+  this->sequence[l].insert(k2Begin + j, v);
+}
+
+void Solution::swap(int k1, int i, int k2, int j) {
   int n = this->sequence[k1][i];
   this->sequence[k1][i] = this->sequence[k2][j];
   this->sequence[k2][j] = n;
-
 }
 
 void Solution::setCost(double cost) { this->cost = cost; }
 
 void Solution::setVehicles(int vehicles) { this->vehicles = vehicles; }
 
-void Solution::setSequence(vector<vector<int>> *sequence)
-{
+void Solution::setSequence(vector<vector<int>> *sequence) {
   this->sequence = *sequence;
 }
 
-double Solution::getCost(int vi, int j)
-{
+double Solution::getCost(int vi, int j, double d) {
   int maxVehicles = Reader::instance->getMaxVehiclesQuantity();
 
-  if (j == maxVehicles)
-  {
+  if (j == maxVehicles) {
     double cost = Reader::instance->getOutsourcing(vi);
     return cost;
-  }
-  else
-  {
-    int demand = Reader::instance->getDemand(vi);
+  } else {
+    // int d = Reader::instance->getDemand(vi);
     int last = this->sequence[j].back();
     int maxDemand = Reader::instance->getCarCapacity();
 
@@ -296,8 +393,7 @@ double Solution::getCost(int vi, int j)
     double cost = this->capacities[j] == 0 ? r : 0;
     cost += Reader::instance->getDistance(last, vi);
 
-    if (this->capacities[j] + demand >= maxDemand)
-    {
+    if (this->capacities[j] + d >= maxDemand) {
       return INFINITE;
     }
 
@@ -305,23 +401,17 @@ double Solution::getCost(int vi, int j)
   }
 }
 
-void Solution::resume()
-{
+void Solution::resume() {
   cout << "Custo: " << this->cost << endl;
   cout << "Número de veiculos: " << this->vehicles << endl;
-  for (size_t i = 0; i < this->sequence.size(); i++)
-  {
-    if (i != sequence.size() - 1)
-    {
+  for (size_t i = 0; i < this->sequence.size(); i++) {
+    if (i != sequence.size() - 1) {
       cout << "Rota do veiculo " << i + 1 << ":" << endl;
-    }
-    else
-    {
+    } else {
       cout << "Pontos de entrega tercerizados: " << endl;
     }
 
-    for (size_t j = 0; j < this->sequence[i].size(); j++)
-    {
+    for (size_t j = 0; j < this->sequence[i].size(); j++) {
       cout << " " << this->sequence[i][j] << " ";
     }
     cout << endl;
