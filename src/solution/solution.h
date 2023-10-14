@@ -17,7 +17,7 @@ private:
   bool bestImprovementReinsertionVehicles();
   bool bestImprovementOutsourcing();
   bool bestImprovementUndoOutsourcing();
-  bool swapVehicles();
+  bool bestImprovementSwapVehicles();
 
   void reinsertion(int k, int i, int l, int j);
   void peformsReinsertionOutsourcing(int k, int i);
@@ -28,6 +28,9 @@ private:
   */
   void peformsRemovalOutsourcing(int i, int k, int j);
   void swap(int k1, int i, int k2, int j);
+
+  bool bestImprovementReinsertionVehicles();
+  void swapElementsBetweenArrays(int k1, int i, int k2, int j);
 
 public:
   Solution(/* args */);

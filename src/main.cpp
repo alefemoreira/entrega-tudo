@@ -11,6 +11,7 @@ int main(int argc, char **argv)
     s.build();
     s.resume();
     cout << endl;
+    cout << endl;
     s.vnd();
     s.resume();
     
