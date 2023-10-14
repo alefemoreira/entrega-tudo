@@ -1,6 +1,6 @@
 # Pre-compiler and Compiler flags
 CXX := g++
-CXX_FLAGS := -fPIC -fexceptions -DNDEBUG -DIL_STD -std=c++17 -g
+CXX_FLAGS := -fPIC -fexceptions -DNDEBUG -DIL_STD -std=c++17 -ggdb
 PRE_FLAGS := -MMD -MP
 
 # Project directory structure
@@ -43,7 +43,7 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	@echo "🚧 Building..."
 	mkdir -p $(dir $@)
-	$(CXX) $(OBJS) -o $@ $(LDPATHS) $(LDFLAGS)
+	$(CXX) $(CXX_FLAGS) $(OBJS) -o $@ $(LDPATHS) $(LDFLAGS)
 
 # Compile all cpp files
 $(BUILD)/%.o: $(SRC)/%.cpp
