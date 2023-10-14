@@ -97,11 +97,11 @@ void Solution::vnd() {
   // bool improved = false;
 
   // do {
-  //   improved = this->bestImprovementReinsertionVehicles();
+  //   improved = this->bestImprovementUndoOutsourcing();
   // } while (improved);
   bool improved = false;
   vector<int> counters({0, 0, 0, 0, 0});
-  vector<int> NL({5, 4, 3});
+  vector<int> NL({5, 4, 3, 2, 1});
 
   while (!NL.empty()) {
     int n = NL.back();
@@ -110,8 +110,11 @@ void Solution::vnd() {
     do {
       switch (n) {
       case 1:
+        improved = false;
         break;
       case 2:
+        improved = false;
+        // improved = this->bestImprovementSwapVehicles();
         break;
       case 3:
         improved = this->bestImprovementReinsertionVehicles();
@@ -440,7 +443,7 @@ void Solution::peformsRemovalOutsourcing(int i, int k, int j) {
   auto kBegin = this->sequence[k].begin();
 
   this->sequence[o].erase(outsourcingBegin + i);
-  this->sequence[k].insert(kBegin + j, vi);
+  this->sequence[k].insert(kBegin + j + 1, vi);
 }
 
 void Solution::reinsertion(int k, int i, int l, int j) {
@@ -470,6 +473,27 @@ void Solution::setVehicles(int vehicles) { this->vehicles = vehicles; }
 
 void Solution::setSequence(vector<vector<int>> *sequence) {
   this->sequence = *sequence;
+}
+
+double Solution::calculateCost() {
+  this->cost = 0;
+  double r = Reader::instance->getCarUseCost();
+  int K = this->sequence.size();
+
+  for (int k = 0; k < K - 1; k++) {
+
+    if (this->sequence[k].size() > 2)
+      this->cost += r;
+
+    for (int i = 0, j = 1; j < this->sequence[k].size(); i++, j++)
+      this->cost += Reader::instance->getDistance(this->sequence[k][i],
+                                                  this->sequence[k][j]);
+  }
+
+  for (int i = 0; i < this->sequence[K - 1].size(); i++)
+    this->cost += Reader::instance->getOutsourcing(this->sequence[K - 1][i]);
+
+  return this->cost;
 }
 
 double Solution::getCost(int vi, int j, double d) {

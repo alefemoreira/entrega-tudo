@@ -39,6 +39,8 @@ public:
   void setCost(double cost);
   void setVehicles(int vehicles);
   inline void setSequence(std::vector<std::vector<int>> *sequence);
+
+  double calculateCost();
   void resume();
 };
 
