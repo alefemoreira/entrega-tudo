@@ -6,8 +6,7 @@
 
 #define INFINITE 99999999
 
-class Reader
-{
+class Reader {
 private:
   int dimension;     // n
   int maxVehicles;   // k
