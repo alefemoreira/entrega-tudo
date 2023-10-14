@@ -35,6 +35,7 @@ public:
   ~Solution();
   void vnd();
   void build();
+  inline double Cost() { return this->cost; }
   void setCost(double cost);
   void setVehicles(int vehicles);
   inline void setSequence(std::vector<std::vector<int>> *sequence);
