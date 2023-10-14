@@ -10,8 +10,6 @@ private:
   int vehicles;   // qtd de vehicles usada pela solução
   int deliveries; // qtd de entregas ñ terceirizadas da solução
 
-  // std::vector<double> costs; // custo dos veiculos e da terceirização
-
   std::vector<std::vector<int>> sequence; // (k + 1) x (n + 2)
   std::vector<int>
       capacities; // quanto da capacidade de cada veículo é utilizada;
