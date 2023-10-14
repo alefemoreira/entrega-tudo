@@ -23,6 +23,7 @@ int main(int argc, char **argv) {
   case 2:
     s.build();
     s.vnd();
+
     cout << "Custo vnd: " << s.Cost() << endl;
     break;
 
