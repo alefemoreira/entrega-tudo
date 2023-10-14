@@ -5,7 +5,8 @@ using namespace std;
 
 int main(int argc, char **argv) {
   if (argc < 3) {
-    cout << "Necessário indicar arquivo e opção de execução [1, 2, 3]" << endl;
+    cout << "Necessário indicar arquivo e opção de execução [1, 2, 3] e seed"
+         << endl;
     return 1;
   }
 
@@ -13,6 +14,8 @@ int main(int argc, char **argv) {
   Reader::instance->read();
   Solution s;
   int op = atoi(argv[2]);
+  int seed = atoi(argv[3]);
+  srand(seed);
 
   switch (op) {
   case 1:
