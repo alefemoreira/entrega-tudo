@@ -29,7 +29,6 @@ private:
   void peformsRemovalOutsourcing(int i, int k, int j);
   void swap(int k1, int i, int k2, int j);
 
-  bool bestImprovementReinsertionVehicles();
   void swapElementsBetweenArrays(int k1, int i, int k2, int j);
 
 public:

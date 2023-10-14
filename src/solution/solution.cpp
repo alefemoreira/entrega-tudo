@@ -173,14 +173,6 @@ bool Solution::bestImprovementSwapVehicles() {
                           Reader::instance->getDistance(vj, viNext) -
                           Reader::instance->getDistance(vi, vjPrev) +
                           Reader::instance->getDistance(vi, vjNext));
-          ;
-
-          double delta = Reader::instance->getDistance(vi, vjNext) +
-                         Reader::instance->getDistance(vj, vi) +
-                         Reader::instance->getDistance(viPrev, viNext) -
-                         Reader::instance->getDistance(viPrev, vi) -
-                         Reader::instance->getDistance(vi, viNext) -
-                         Reader::instance->getDistance(vj, vjNext);
           // cout << " -- " << vjPrev  << " " << vj<< " " << vjNext << endl;
 
           // cout << " -> Delta: " << delta << " " << vi << " <-> " << vj <<
