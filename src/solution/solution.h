@@ -9,6 +9,9 @@ private:
   double cost;    // custo da solução
   int vehicles;   // qtd de vehicles usada pela solução
   int deliveries; // qtd de entregas ñ terceirizadas da solução
+
+  // std::vector<double> costs; // custo dos veiculos e da terceirização
+
   std::vector<std::vector<int>> sequence; // (k + 1) x (n + 2)
   std::vector<int>
       capacities; // quanto da capacidade de cada veículo é utilizada;
@@ -28,8 +31,6 @@ private:
   */
   void peformsRemovalOutsourcing(int i, int k, int j);
   void swap(int k1, int i, int k2, int j);
-
-  void swapElementsBetweenArrays(int k1, int i, int k2, int j);
 
 public:
   Solution(/* args */);

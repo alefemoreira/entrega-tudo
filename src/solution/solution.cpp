@@ -97,7 +97,7 @@ void Solution::vnd() {
   // bool improved = false;
 
   // do {
-  //   improved = this->bestImprovementUndoOutsourcing();
+  //   improved = this->bestImprovementSwapVehicles();
   // } while (improved);
   bool improved = false;
   vector<int> counters({0, 0, 0, 0, 0});
@@ -113,8 +113,7 @@ void Solution::vnd() {
         improved = false;
         break;
       case 2:
-        improved = false;
-        // improved = this->bestImprovementSwapVehicles();
+        improved = this->bestImprovementSwapVehicles();
         break;
       case 3:
         improved = this->bestImprovementReinsertionVehicles();
@@ -131,79 +130,62 @@ void Solution::vnd() {
 }
 
 bool Solution::bestImprovementSwapVehicles() {
-  int bestI, bestJ, bestK1, bestK2;
+  int bestI, bestJ, bestK, bestL, iDemand, jDemand;
   int bestDelta = 0;
-  int vehicles = Reader::instance->getMaxVehiclesQuantity();
+  int K = Reader::instance->getMaxVehiclesQuantity();
   double r = Reader::instance->getCarUseCost();
   int Q = Reader::instance->getCarCapacity();
   // int dimension = this->
 
-  for (int k1 = 0; k1 < vehicles; k1++) {
-    for (int k2 = k1 + 1; k2 < vehicles;
-         k2++) // k2 = k1 poderia fazer trocas na mesma rota
-    {
-      // cout << "Troca entre veiculo " << k1 + 1 << " e veiculo " << k2 + 1 <<
-      // endl;
-      for (int i = 1; i < this->sequence[k1].size() - 1; i++) {
-        // só executa operações com o primeiro e o ultimo elemento quando for a
-        // rota dos terceirizados if (k2 != vehicles && (i == 0 || i ==
-        // this->sequence[k1].size() - 1))
-        //   continue;
+  for (int k = 0; k < K - 1; k++) {
+    for (int i = 1; i < this->sequence[k].size() - 1; i++) {
+      int vi = this->sequence[k][i];
+      int viPrev = this->sequence[k][i - 1];
+      int viNext = this->sequence[k][i + 1];
+      int viDemand = Reader::instance->getDemand(vi);
 
-        int vi = this->sequence[k1][i];
-        int viPrev = this->sequence[k1][i - 1];
-        int viNext = this->sequence[k1][i + 1];
+      double costViPrevVi = Reader::instance->getDistance(viPrev, vi);
+      double costViViNext = Reader::instance->getDistance(vi, viNext);
 
-        // cout << viPrev  << " " << vi<< " " <<viNext ;
+      int currentKCapacity = this->capacities[k] - viDemand;
 
-        int j = 1;
+      for (int l = 0; l < K - 1; l++) {
+        if (k == l) // l == k poderia fazer trocas na mesma rota
+          continue;
 
-        for (; j < this->sequence[k2].size() - 1; j++) {
-          // só executa operações com o primeiro e o ultimo elemento quando for
-          // a rota dos terceirizados if (k2 != vehicles && (j == 0 || j ==
-          // this->sequence[k2].size() - 1))
-          //   continue;
+        for (int j = 1; j < this->sequence[l].size() - 1; j++) {
+          int vj = this->sequence[l][j];
+          int vjDemand = Reader::instance->getDemand(vj);
+          int currentLCapacity = this->capacities[l] - vjDemand;
 
-          int vj = this->sequence[k2][j];
-          int vjPrev = this->sequence[k2][j - 1];
-          int vjNext = this->sequence[k2][j + 1];
+          // caso em que a troca estoura a capacidade de um dos carros;
+          if (currentLCapacity + viDemand > Q ||
+              currentKCapacity + vjDemand > Q)
+            continue;
 
-          double delta = (Reader::instance->getDistance(vi, viPrev) +
-                          Reader::instance->getDistance(vi, viNext) +
-                          Reader::instance->getDistance(vj, vjPrev) +
-                          Reader::instance->getDistance(vj, vjNext)) -
-                         (Reader::instance->getDistance(vj, viPrev) +
-                          Reader::instance->getDistance(vj, viNext) -
-                          Reader::instance->getDistance(vi, vjPrev) +
-                          Reader::instance->getDistance(vi, vjNext));
-          // cout << " -- " << vjPrev  << " " << vj<< " " << vjNext << endl;
+          int vjPrev = this->sequence[l][j - 1];
+          int vjNext = this->sequence[l][j + 1];
 
-          // cout << " -> Delta: " << delta << " " << vi << " <-> " << vj <<
-          // endl;
+          double costVjPrevVj = Reader::instance->getDistance(vjPrev, vj);
+          double costVjVjNext = Reader::instance->getDistance(vj, vjNext);
 
-          // if (this->sequence[k2].size() == 2)
-          //   delta += r;
+          double delta = Reader::instance->getDistance(viPrev, vj) +
+                         Reader::instance->getDistance(vj, viNext) +
+                         Reader::instance->getDistance(vjPrev, vi) +
+                         Reader::instance->getDistance(vi, vjNext) -
+                         costViPrevVi - costViViNext - costVjPrevVj -
+                         costVjPrevVj;
 
-          // if (this->sequence[k1].size() == 3)
-          //   delta -= r;
-
-          // Só atualiza os valores se a troca poder ser feita sem ultrapassar
-          // as capacidades dos carros
+          // Só atualiza os valores se a troca poder ser feita sem
+          // ultrapassar as capacidades dos carros
           if (delta < bestDelta) {
-            int demand1 = Reader::instance->getDemand(this->sequence[k1][i]);
-            int demand2 = Reader::instance->getDemand(this->sequence[k2][j]);
-            int maxVehicleCapacity = Reader::instance->getCarCapacity();
-            bool isAproved = (((this->capacities[k1] - demand1) + demand2) <=
-                              maxVehicleCapacity) &&
-                             (((this->capacities[k2] - demand2) + demand1) <=
-                              maxVehicleCapacity);
-            if (isAproved) {
-              bestDelta = delta;
-              bestI = i;
-              bestJ = j;
-              bestK1 = k1;
-              bestK2 = k2;
-            }
+            bestDelta = delta;
+            bestI = i;
+            bestJ = j;
+            bestK = k;
+            bestL = l;
+            iDemand = viDemand;
+            jDemand = vjDemand;
           }
         }
         // cout << endl;
@@ -212,33 +194,24 @@ bool Solution::bestImprovementSwapVehicles() {
     }
   }
 
-  // cout << "Melhor delta entre os carros " << bestK1 << " e " << bestK2 << ":
-  // " << bestDelta << " " << this->sequence[bestK1][bestI] << " <-> " <<
-  // this->sequence[bestK2][bestJ] << endl;
+  // cout << "Melhor delta entre os carros " << bestK << " e " << bestL << ":
+  // " << bestDelta << " " << this->sequence[bestK][bestI] << " <-> " <<
+  // this->sequence[bestL][bestJ] << endl;
 
   if (bestDelta < 0) {
-    // Verificando as capacidades dos veiculos
-    int demand1 = Reader::instance->getDemand(this->sequence[bestK1][bestI]);
-    int demand2 = Reader::instance->getDemand(this->sequence[bestK2][bestJ]);
-    int maxVehicleCapacity = Reader::instance->getCarCapacity();
-    bool isAproved = (((this->capacities[bestK1] - demand1) + demand2) <=
-                      maxVehicleCapacity) &&
-                     (((this->capacities[bestK2] - demand2) + demand1) <=
-                      maxVehicleCapacity);
-    // cout << "Capacidade carro k1: " << ((this->capacities[bestK1] - demand1)
+
+    // cout << "Capacidade carro k: " << ((this->capacities[bestK] - demand1)
     // + demand2) << " - Capacidade antes da troca: " <<
-    // this->capacities[bestK1] << endl; cout << "Capacidade carro k2: " <<
-    // ((this->capacities[bestK2] - demand2) + demand1) << " - Capacidade antes
-    // da troca: " << this->capacities[bestK2] << endl; cout << "Capacidade
+    // this->capacities[bestK] << endl; cout << "Capacidade carro l: " <<
+    // ((this->capacities[bestL] - demand2) + demand1) << " - Capacidade antes
+    // da troca: " << this->capacities[bestL] << endl; cout << "Capacidade
     // total: " << maxVehicleCapacity << endl; cout << "As Capacidades dos
     // carros suportam as trocas: " << isAproved << endl;
-    if (isAproved) {
-      this->cost += bestDelta;
-      this->capacities[bestK1] = this->capacities[bestK1] - demand1 + demand2;
-      this->capacities[bestK2] = this->capacities[bestK2] - demand2 + demand1;
-      this->swapElementsBetweenArrays(bestK1, bestI, bestK2, bestJ);
-      return true;
-    }
+    this->cost += bestDelta;
+    this->capacities[bestK] += (jDemand - iDemand);
+    this->capacities[bestL] += (iDemand - jDemand);
+    std::swap(this->sequence[bestK][bestI], this->sequence[bestL][bestJ]);
+    return true;
   }
   return false;
 }
@@ -459,12 +432,6 @@ void Solution::swap(int k1, int i, int k2, int j) {
   int n = this->sequence[k1][i];
   this->sequence[k1][i] = this->sequence[k2][j];
   this->sequence[k2][j] = n;
-}
-
-void Solution::swapElementsBetweenArrays(int k1, int i, int k2, int j) {
-  int temp = this->sequence[k1][i];
-  this->sequence[k1][i] = this->sequence[k2][j];
-  this->sequence[k2][j] = temp;
 }
 
 void Solution::setCost(double cost) { this->cost = cost; }
