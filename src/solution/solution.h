@@ -16,6 +16,7 @@ private:
       capacities; // quanto da capacidade de cada veículo é utilizada;
   double getCost(int i, int j, double d);
 
+  bool bestImprovementSwapCity();
   bool bestImprovementReinsertionVehicles();
   bool bestImprovementOutsourcing();
   bool bestImprovementUndoOutsourcing();

@@ -125,6 +125,8 @@ BestNeighbor swapInLine(
                                   getCost(costs, *currentJ, *nextJ, numMax);
                 }
 
+                newCost = bestNeighbor.bestCost + addCosts - removeCosts;
+
                 if (newCost < bestNeighbor.bestCost)
                 {
                     bestI = distance(sequencieLine.begin(), currentI);
