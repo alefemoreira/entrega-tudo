@@ -34,3 +34,5 @@
 main
 .vscode/
 settings.json
+
+.DS_Store

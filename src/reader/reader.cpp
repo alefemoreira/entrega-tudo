@@ -4,7 +4,7 @@
 
 using namespace std;
 
-Reader::Reader(int count, std::string path)
+Reader::Reader(int count, char *path)
 {
   this->argCount = count;
   this->instancePath = path;
@@ -13,7 +13,7 @@ Reader::~Reader() {}
 
 Reader *Reader::instance = nullptr;
 
-void Reader::create(int count, std::string path)
+void Reader::create(int count, char *path)
 {
   if (instance == nullptr)
     Reader::instance = new Reader(count, path);
@@ -21,16 +21,87 @@ void Reader::create(int count, std::string path)
 
 void Reader::read()
 {
-  ifstream in(this->instancePath, ios::in);
+  ifstream instanceFile(this->instancePath, ios::in);
   string file;
 
-  if (!in)
+  if (!instanceFile)
   {
     cout << "File not found" << endl;
     exit(1);
   }
 
-  // if
+  instanceFile >> this->dimension;
+  instanceFile >> this->maxVehicles;
+  instanceFile >> this->carCapacity;
+  instanceFile >> this->minDelivery;
+  instanceFile >> this->carUseCost;
 
+  this->demands = new int[this->dimension];
+  this->outsourcing = new double[this->dimension];
+  this->distances = new double *[this->dimension + 1];
+  for (int i = 0; i < dimension + 1; i++)
+  {
+    this->distances[i] = new double[dimension + 1];
+  }
+
+  for (int i = 0; i < dimension; i++)
+  {
+    instanceFile >> this->demands[i];
+  }
+
+  for (int i = 0; i < dimension; i++)
+  {
+    instanceFile >> this->outsourcing[i];
+  }
+
+  for (int i = 0; i < dimension + 1; i++)
+  {
+    for (int j = 0; j < dimension + 1; j++)
+    {
+      instanceFile >> this->distances[i][j];
+      if (i == j)
+        this->distances[i][j] = 0;
+    }
+  }
+
+  instanceFile.close();
   // this->distances = new double*[n]
+}
+
+void Reader::showInstance()
+{
+  cout << "Entregas: " << this->dimension << endl;
+  cout << "Veículos: " << this->maxVehicles << endl;
+  cout << "Capacidade dos veículos: " << this->carCapacity << endl;
+  cout << "Quantidade mínima de entrega: " << this->minDelivery << endl;
+  cout << "Custo por uso do carro: " << this->carUseCost << endl;
+  cout << endl
+       << endl;
+
+  cout << "Demandas: " << endl;
+  for (int i = 0; i < dimension; i++)
+  {
+    cout << this->demands[i] << " ";
+  }
+  cout << endl
+       << endl;
+
+  cout << "Custo da terceirização" << endl;
+  for (int i = 0; i < dimension; i++)
+  {
+    cout << this->outsourcing[i] << " ";
+  }
+  cout << endl
+       << endl;
+
+  cout << "Matriz de distâncias: " << endl;
+
+  for (int i = 0; i < dimension + 1; i++)
+  {
+    for (int j = 0; j < dimension + 1; j++)
+    {
+      cout << this->distances[i][j] << " ";
+    }
+    cout << endl;
+  }
 }

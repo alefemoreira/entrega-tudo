@@ -4,8 +4,9 @@
 #include <iostream>
 #include <string>
 
-class Reader
-{
+#define INFINITE 99999999
+
+class Reader {
 private:
   int dimension;     // n
   int maxVehicles;   // k
@@ -14,28 +15,29 @@ private:
   double carUseCost; // r
 
   int *demands;
-  int *outsourcing;
+  double *outsourcing;
   double **distances;
 
-  std::string instancePath;
+  char *instancePath;
   int argCount;
 
 public:
-  Reader(int count, std::string path);
+  Reader(int count, char *path);
   ~Reader();
 
   static Reader *instance;
 
-  static void create(int count, std::string path);
+  static void create(int count, char *path);
 
   void read();
+  void showInstance();
 
-  inline double getDistante(int i, int j) { return this->distances[i][j]; }
-  inline int getDemand(int i) { return this->demands[i]; }
-  inline int getOutsourcing(int i) { return this->outsourcing[i]; }
+  inline double getDistance(int i, int j) { return this->distances[i][j]; }
+  inline int getDemand(int i) { return this->demands[i - 1]; }
+  inline double getOutsourcing(int i) { return this->outsourcing[i - 1]; }
   inline int getCarCapacity() { return this->carCapacity; }
   inline int getDimension() { return this->dimension; }
-  inline int getMAxVehiclesQuantity() { return this->maxVehicles; }
+  inline int getMaxVehiclesQuantity() { return this->maxVehicles; }
   inline double getCarUseCost() { return this->carUseCost; }
   inline int getMinimumDelivery() { return this->minDelivery; }
 };
