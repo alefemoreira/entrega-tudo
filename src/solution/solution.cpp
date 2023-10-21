@@ -5,6 +5,11 @@
 
 using namespace std;
 
+Solution *Solution::disturbance(Solution *s) {
+  /* TODO */
+  return s;
+}
+
 void Solution::build() {
   this->cost = 0;
   int n = Reader::instance->getDimension();
@@ -93,40 +98,41 @@ Solution::Solution(/* args */) {
 
 Solution::~Solution() {}
 
-void Solution::vnd() {
-  // bool improved = false;
-
-  // do {
-  //   improved = this->bestImprovementSwapVehicles();
-  // } while (improved);
+void Solution::localSearch() {
+  std::vector<int> NL = {1, 2, 3, 4, 5};
   bool improved = false;
-  vector<int> counters({0, 0, 0, 0, 0});
-  vector<int> NL({5, 4, 3, 2, 1});
+  int n = 1;
+  int r = 5;
 
-  while (!NL.empty()) {
-    int n = NL.back();
-    NL.pop_back();
+  while (n <= r) {
+    switch (n) {
+    case 1:
+      improved = false;
 
-    do {
-      switch (n) {
-      case 1:
-        improved = false;
-        break;
-      case 2:
-        improved = this->bestImprovementSwapVehicles();
-        break;
-      case 3:
-        improved = this->bestImprovementReinsertionVehicles();
-        break;
-      case 4:
-        improved = this->bestImprovementOutsourcing();
-        break;
-      case 5:
-        improved = this->bestImprovementUndoOutsourcing();
-        break;
-      }
-    } while (improved);
-  }
+      break;
+    case 2:
+      improved = this->bestImprovementSwapVehicles();
+
+      break;
+    case 3:
+      improved = this->bestImprovementReinsertionVehicles();
+
+      break;
+    case 4:
+      improved = this->bestImprovementOutsourcing();
+
+      break;
+    case 5:
+      improved = this->bestImprovementUndoOutsourcing();
+
+      break;
+    }
+    if (improved) {
+      n = 1;
+    } else {
+      n++;
+    }
+  };
 }
 
 bool Solution::bestImprovementSwapVehicles() {
@@ -137,7 +143,7 @@ bool Solution::bestImprovementSwapVehicles() {
   int Q = Reader::instance->getCarCapacity();
   // int dimension = this->
 
-  for (int k = 0; k < K - 1; k++) {
+  for (int k = 0; k < this->sequence.size() - 1; k++) {
     for (int i = 1; i < this->sequence[k].size() - 1; i++) {
       int vi = this->sequence[k][i];
       int viPrev = this->sequence[k][i - 1];
@@ -149,16 +155,13 @@ bool Solution::bestImprovementSwapVehicles() {
 
       int currentKCapacity = this->capacities[k] - viDemand;
 
-      for (int l = 0; l < K - 1; l++) {
-        if (k == l) // l == k poderia fazer trocas na mesma rota
-          continue;
+      for (int l = k + 1; l < this->sequence.size() - 1; l++) {
 
         for (int j = 1; j < this->sequence[l].size() - 1; j++) {
           int vj = this->sequence[l][j];
           int vjDemand = Reader::instance->getDemand(vj);
           int currentLCapacity = this->capacities[l] - vjDemand;
 
-          // caso em que a troca estoura a capacidade de um dos carros;
           if (currentLCapacity + viDemand > Q ||
               currentKCapacity + vjDemand > Q)
             continue;
@@ -174,10 +177,8 @@ bool Solution::bestImprovementSwapVehicles() {
                          Reader::instance->getDistance(vjPrev, vi) +
                          Reader::instance->getDistance(vi, vjNext) -
                          costViPrevVi - costViViNext - costVjPrevVj -
-                         costVjPrevVj;
+                         costVjVjNext;
 
-          // Só atualiza os valores se a troca poder ser feita sem
-          // ultrapassar as capacidades dos carros
           if (delta < bestDelta) {
             bestDelta = delta;
             bestI = i;
@@ -188,25 +189,11 @@ bool Solution::bestImprovementSwapVehicles() {
             jDemand = vjDemand;
           }
         }
-        // cout << endl;
       }
-      // cout << endl;
     }
   }
 
-  // cout << "Melhor delta entre os carros " << bestK << " e " << bestL << ":
-  // " << bestDelta << " " << this->sequence[bestK][bestI] << " <-> " <<
-  // this->sequence[bestL][bestJ] << endl;
-
   if (bestDelta < 0) {
-
-    // cout << "Capacidade carro k: " << ((this->capacities[bestK] - demand1)
-    // + demand2) << " - Capacidade antes da troca: " <<
-    // this->capacities[bestK] << endl; cout << "Capacidade carro l: " <<
-    // ((this->capacities[bestL] - demand2) + demand1) << " - Capacidade antes
-    // da troca: " << this->capacities[bestL] << endl; cout << "Capacidade
-    // total: " << maxVehicleCapacity << endl; cout << "As Capacidades dos
-    // carros suportam as trocas: " << isAproved << endl;
     this->cost += bestDelta;
     this->capacities[bestK] += (jDemand - iDemand);
     this->capacities[bestL] += (iDemand - jDemand);
