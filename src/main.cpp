@@ -1,41 +1,77 @@
 #include "reader/reader.h"
 #include "solution/solution.h"
+#include <chrono>
+#include <iomanip>
 
 using namespace std;
 
+int guloso() {
+  using std::chrono::duration;
+  using std::chrono::duration_cast;
+  using std::chrono::high_resolution_clock;
+  using std::chrono::milliseconds;
+
+  Solution s;
+  auto start = std::chrono::high_resolution_clock::now();
+  s.build();
+  auto end = std::chrono::high_resolution_clock::now();
+  duration<double, std::milli> duration_ = end - start;
+
+  cout << Reader::instance->getInstanceName() << ";" << s.Cost() << ";"
+       << duration_.count() / 1000 << endl;
+
+  return 0;
+}
+
+int vnd() {
+  using std::chrono::duration;
+  using std::chrono::duration_cast;
+  using std::chrono::high_resolution_clock;
+  using std::chrono::milliseconds;
+
+  Solution s;
+  auto start = std::chrono::high_resolution_clock::now();
+  s.build();
+  s.localSearch();
+  auto end = std::chrono::high_resolution_clock::now();
+  duration<double, std::milli> duration_ = end - start;
+
+  cout << Reader::instance->getInstanceName() << ";" << s.Cost() << ";"
+       << duration_.count() / 1000 << endl;
+
+  return 0;
+}
+
 int main(int argc, char **argv) {
+  cout << fixed << std::setprecision(2);
   if (argc < 3) {
-    cout << "Necessário indicar arquivo e opção de execução [1, 2, 3] e seed"
+    cout << "Necessário indicar arquivo e opção de execução [guloso : 1, vnd: "
+            "2, ils: 3] e seed"
          << endl;
     return 1;
   }
 
   Reader::create(argc, argv[1]);
   Reader::instance->read();
-  Solution s;
+
   int op = atoi(argv[2]);
   int seed = atoi(argv[3]);
   srand(seed);
 
   switch (op) {
   case 1:
-    s.build();
-    cout << "Custo guloso: " << s.Cost() << endl;
-    break;
+    return guloso();
 
   case 2:
-    s.build();
-    s.vnd();
-
-    cout << "Custo vnd: " << s.Cost() << endl;
-    break;
+    return vnd();
 
   case 3:
     cout << "ILS ainda não implementado" << endl;
-    break;
+    return 0;
 
   default:
     cout << "Opção inválida" << endl;
+    return 1;
   }
 
   //   cout << "Custo recauculado: " << s.calculateCost() << endl;

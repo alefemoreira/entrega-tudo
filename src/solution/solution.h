@@ -35,12 +35,13 @@ private:
 public:
   Solution(/* args */);
   ~Solution();
-  void vnd();
+  void localSearch();
   void build();
   inline double Cost() { return this->cost; }
   void setCost(double cost);
   void setVehicles(int vehicles);
   inline void setSequence(std::vector<std::vector<int>> *sequence);
+  static Solution *disturbance(Solution *s);
 
   double calculateCost();
   void resume();

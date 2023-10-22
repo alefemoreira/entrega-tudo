@@ -20,6 +20,7 @@ private:
 
   char *instancePath;
   int argCount;
+  std::string instanceName;
 
 public:
   Reader(int count, char *path);
@@ -31,6 +32,7 @@ public:
 
   void read();
   void showInstance();
+  std::string getInstanceName();
 
   inline double getDistance(int i, int j) { return this->distances[i][j]; }
   inline int getDemand(int i) { return this->demands[i - 1]; }
