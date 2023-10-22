@@ -194,6 +194,7 @@ bool Solution::bestImprovementSwap() {
   }
 
   if (bestDelta < 0) {
+    this->cost += bestDelta;
     std::swap(this->sequence[bestK][bestI], this->sequence[bestK][bestJ]);
 
     return true;
