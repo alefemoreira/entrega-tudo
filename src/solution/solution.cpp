@@ -107,7 +107,7 @@ void Solution::localSearch() {
   while (n <= r) {
     switch (n) {
     case 1:
-      improved = false;
+      improved = this->bestImprovementSwap();
 
       break;
     case 2:
@@ -133,6 +133,74 @@ void Solution::localSearch() {
       n++;
     }
   };
+}
+
+bool Solution::bestImprovementSwap() {
+  // melhor I, J e linha
+  int bestI, bestJ, bestK;
+
+  // número máximo de veículos
+  int K = this->sequence.size();
+  double bestDelta = 0;
+
+  // l = rota
+  for (int l = 0; l < K - 1; l++) {
+    for (int i = 1; i < this->sequence[l].size() - 2; i++) {
+      int currentI = this->sequence[l][i];
+      int nextI = this->sequence[l][i + 1];
+      int prevI = this->sequence[l][i - 1];
+
+      int j = i + 1;
+      int currentJ = this->sequence[l][j];
+      int nextJ = this->sequence[l][j + 1];
+      int prevJ = this->sequence[l][j - 1];
+
+      double delta = Reader::instance->getDistance(prevI, currentJ) +
+                     Reader::instance->getDistance(currentJ, currentI) +
+                     Reader::instance->getDistance(currentI, nextJ) -
+                     Reader::instance->getDistance(prevI, currentI) -
+                     Reader::instance->getDistance(currentI, currentJ) -
+                     Reader::instance->getDistance(currentJ, nextJ);
+
+      if (delta < bestDelta) {
+        bestDelta = delta;
+        bestI = i;
+        bestJ = j;
+        bestK = l;
+      }
+
+      for (j = i + 2; j < this->sequence[l].size() - 1; j++) {
+        currentJ = this->sequence[l][j];
+        nextJ = this->sequence[l][j + 1];
+        prevJ = this->sequence[l][j - 1];
+
+        delta = Reader::instance->getDistance(prevI, currentJ) +
+                Reader::instance->getDistance(currentJ, nextI) +
+                Reader::instance->getDistance(prevJ, currentI) +
+                Reader::instance->getDistance(currentI, nextJ) -
+                Reader::instance->getDistance(prevI, currentI) -
+                Reader::instance->getDistance(currentI, nextI) -
+                Reader::instance->getDistance(prevJ, currentJ) -
+                Reader::instance->getDistance(currentJ, nextJ);
+
+        if (delta < bestDelta) {
+          bestDelta = delta;
+          bestI = i;
+          bestJ = j;
+          bestK = l;
+        }
+      }
+    }
+  }
+
+  if (bestDelta < 0) {
+    this->cost += bestDelta;
+    std::swap(this->sequence[bestK][bestI], this->sequence[bestK][bestJ]);
+
+    return true;
+  }
+
+  return false;
 }
 
 bool Solution::bestImprovementSwapVehicles() {

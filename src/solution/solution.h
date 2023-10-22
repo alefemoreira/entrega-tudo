@@ -4,7 +4,8 @@
 #include <iostream>
 #include <vector>
 
-class Solution {
+class Solution
+{
 private:
   double cost;    // custo da solução
   int vehicles;   // qtd de vehicles usada pela solução
@@ -15,6 +16,7 @@ private:
       capacities; // quanto da capacidade de cada veículo é utilizada;
   double getCost(int i, int j, double d);
 
+  bool bestImprovementSwap();
   bool bestImprovementReinsertionVehicles();
   bool bestImprovementOutsourcing();
   bool bestImprovementUndoOutsourcing();
