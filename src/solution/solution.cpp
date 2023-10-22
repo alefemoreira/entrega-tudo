@@ -5,7 +5,8 @@
 
 using namespace std;
 
-void Solution::build() {
+void Solution::build()
+{
   this->cost = 0;
   int n = Reader::instance->getDimension();
   int K = Reader::instance->getMaxVehiclesQuantity();
@@ -110,7 +111,7 @@ void Solution::vnd() {
     do {
       switch (n) {
       case 1:
-        improved = this->bestImprovementSwapCity();
+        improved = this->bestImprovementSwap();
         break;
       case 2:
         improved = this->bestImprovementSwapVehicles();
@@ -129,83 +130,66 @@ void Solution::vnd() {
   }
 }
 
-double getDistanceInRange(int k, int i, int j) {
-  if (i > 0 && i <= k && j <= k && j > 0) {
-    return Reader::instance->getDistance(i, j);
-  }
-
-  return 0;
-}
-
-bool Solution::bestImprovementSwapCity() {
+bool Solution::bestImprovementSwap() {
   // melhor I, J e linha
-  int bestI, bestJ, bestLine;
-
-  // custos a se adicionar e remover
-  int addCosts = 0;
-  int removeCosts = 0;
+  int bestI, bestJ, bestK;
 
   // número máximo de veículos
-  int K = Reader::instance->getMaxVehiclesQuantity();
-
-  int citiesQtd;
-  double delta;
+  int K = this->sequence.size();
   double bestDelta = 0;
-  vector<int> sequencieRoute;
-  vector<int>::iterator currentI;
-  vector<int>::iterator currentJ;
-  vector<int>::iterator nextI;
-  vector<int>::iterator nextJ;
-  vector<int>::iterator prevI;
-  vector<int>::iterator prevJ;
 
   // l = rota
-  for (int l = 0; l < K -1; l++) {
-    // atribuindo a rota e a quantidade de cidades por rota
-    sequencieRoute = this->sequence[l];
-    citiesQtd = sequencieRoute.size();
+  for (int l = 0; l < K - 1; l++) {
+    for (int i = 1; i < this->sequence[l].size() - 2; i++) {
+      int currentI = this->sequence[l][i];
+      int nextI = this->sequence[l][i + 1];
+      int prevI = this->sequence[l][i - 1];
 
-    for (currentI = sequencieRoute.begin(); currentI < sequencieRoute.end(); currentI++) {
-      for (currentJ = currentI + 1; currentJ < sequencieRoute.end(); currentJ++) {
-        nextI = next(currentI);
-        prevI = prev(currentI);
-        nextJ = next(currentJ);
-        prevJ = prev(currentJ);
+      int j = i + 1;
+      int currentJ = this->sequence[l][j];
+      int nextJ = this->sequence[l][j + 1];
+      int prevJ = this->sequence[l][j - 1];
 
-        if (currentI + 1 == currentJ) {
-          addCosts = getDistanceInRange(citiesQtd, *prevI, *currentJ) +
-                     getDistanceInRange(citiesQtd, *currentJ, *currentI) +
-                     getDistanceInRange(citiesQtd, *currentI, *nextJ);
-                  
-          removeCosts = getDistanceInRange(citiesQtd, *prevI, *currentI) +
-                        getDistanceInRange(citiesQtd, *currentI, *currentJ) +
-                        getDistanceInRange(citiesQtd, *currentJ, *nextJ);
-        } else {
-          addCosts = getDistanceInRange(citiesQtd, *prevI, *currentJ) +
-                     getDistanceInRange(citiesQtd, *currentJ, *nextI) +
-                     getDistanceInRange(citiesQtd, *prevJ, *currentI) +
-                     getDistanceInRange(citiesQtd, *currentI, *nextJ);
+      double delta = Reader::instance->getDistance(prevI, currentJ) +
+                     Reader::instance->getDistance(currentJ, currentI) +
+                     Reader::instance->getDistance(currentI, nextJ) -
+                     Reader::instance->getDistance(prevI, currentI) -
+                     Reader::instance->getDistance(currentI, currentJ) -
+                     Reader::instance->getDistance(currentJ, nextJ);
 
-          removeCosts = getDistanceInRange(citiesQtd, *prevI, *currentI) +
-                        getDistanceInRange(citiesQtd, *currentI, *nextI) +
-                        getDistanceInRange(citiesQtd, *prevJ, *currentJ) +
-                        getDistanceInRange(citiesQtd, *currentJ, *nextJ);
-        }
+      if (delta < bestDelta) {
+        bestDelta = delta;
+        bestI = i;
+        bestJ = j;
+        bestK = l;
+      }
 
-        delta = addCosts - removeCosts;
+      for (j = i + 2; j < this->sequence[l].size() - 1; j++) {
+        currentJ = this->sequence[l][j];
+        nextJ = this->sequence[l][j + 1];
+        prevJ = this->sequence[l][j - 1];
+
+        delta = Reader::instance->getDistance(prevI, currentJ) +
+                Reader::instance->getDistance(currentJ, nextI) +
+                Reader::instance->getDistance(prevJ, currentI) +
+                Reader::instance->getDistance(currentI, nextJ) -
+                Reader::instance->getDistance(prevI, currentI) -
+                Reader::instance->getDistance(currentI, nextI) -
+                Reader::instance->getDistance(prevJ, currentJ) -
+                Reader::instance->getDistance(currentJ, nextJ);
 
         if (delta < bestDelta) {
           bestDelta = delta;
-          bestI = std::distance(sequencieRoute.begin(), currentI);
-          bestJ = distance(sequencieRoute.begin(), currentJ);
-          bestLine = l;
+          bestI = i;
+          bestJ = j;
+          bestK = l;
         }
       }
     }
   }
 
   if (bestDelta < 0) {
-    std::swap(this->sequence[bestLine][bestI], this->sequence[bestLine][bestJ]);
+    std::swap(this->sequence[bestK][bestI], this->sequence[bestK][bestJ]);
 
     return true;
   }
