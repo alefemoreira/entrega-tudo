@@ -31,8 +31,10 @@ int vnd() {
 
   Solution s;
   auto start = std::chrono::high_resolution_clock::now();
+
   s.build();
   s.localSearch();
+
   auto end = std::chrono::high_resolution_clock::now();
   duration<double, std::milli> duration_ = end - start;
 
@@ -43,20 +45,26 @@ int vnd() {
 }
 
 int main(int argc, char **argv) {
-  cout << fixed << std::setprecision(2);
+  cout << fixed << std::setprecision(5);
   if (argc < 3) {
-    cout << "Necessário indicar arquivo e opção de execução [guloso : 1, vnd: "
-            "2, ils: 3] e seed"
+    cout << "Necessário indicar arquivo, opção de execução [guloso : 1, vnd: "
+            "2, ils: 3] e seed [opcional]"
          << endl;
-    return 1;
+    cout << "\n./vin/main instancia op [seed]" << endl;
+
+    return -1;
   }
 
   Reader::create(argc, argv[1]);
   Reader::instance->read();
 
   int op = atoi(argv[2]);
-  int seed = atoi(argv[3]);
-  srand(seed);
+  if (argc >= 4) {
+    int seed = atoi(argv[3]);
+    srand(seed);
+  } else {
+    srand(time(0));
+  }
 
   switch (op) {
   case 1:

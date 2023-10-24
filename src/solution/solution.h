@@ -4,8 +4,7 @@
 #include <iostream>
 #include <vector>
 
-class Solution
-{
+class Solution {
 private:
   double cost;    // custo da solução
   int vehicles;   // qtd de vehicles usada pela solução
@@ -17,6 +16,7 @@ private:
   double getCost(int i, int j, double d);
 
   bool bestImprovementSwap();
+  bool bestImprovementTwoOpt();
   bool bestImprovementReinsertionVehicles();
   bool bestImprovementOutsourcing();
   bool bestImprovementUndoOutsourcing();
@@ -24,6 +24,7 @@ private:
 
   void reinsertion(int k, int i, int l, int j);
   void peformsReinsertionOutsourcing(int k, int i);
+  void disturbance();
 
   /*
     Remove elemento outsouring[i] e insere em sequence[k][j];
@@ -34,6 +35,7 @@ private:
 
 public:
   Solution(/* args */);
+  Solution(Solution *s);
   ~Solution();
   void localSearch();
   void build();
@@ -44,7 +46,13 @@ public:
   static Solution *disturbance(Solution *s);
 
   double calculateCost();
+  bool feasible();
   void resume();
+
+  inline std::vector<std::vector<int>> getSequence() { return this->sequence; }
+  inline std::vector<int> getCapacities() { return this->capacities; }
+  inline int getVehicles() { return this->vehicles; }
+  inline int getDeliveries() { return this->deliveries; }
 };
 
 #endif
