@@ -1,6 +1,6 @@
 # Pre-compiler and Compiler flags
 CXX := g++
-CXX_FLAGS := -fPIC -fexceptions -DNDEBUG -DIL_STD -std=c++17 -g3
+CXX_FLAGS := -fPIC -fexceptions -DNDEBUG -DIL_STD -std=c++17 -O3
 PRE_FLAGS := -MMD -MP
 
 # Project directory structure

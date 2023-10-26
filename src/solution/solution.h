@@ -17,21 +17,18 @@ private:
 
   bool bestImprovementSwap();
   bool bestImprovementTwoOpt();
-  bool bestImprovementReinsertionVehicles();
-  bool bestImprovementOutsourcing();
-  bool bestImprovementUndoOutsourcing();
+  bool bestImprovementOrOpt(int size);
   bool bestImprovementSwapVehicles();
 
-  void reinsertion(int k, int i, int l, int j);
-  void peformsReinsertionOutsourcing(int k, int i);
+  void reinsertion(int k, int i, int l, int j, int size);
+  void peformsReinsertionOutsourcing(int k, int i, int size);
   void disturbance();
 
   /*
     Remove elemento outsouring[i] e insere em sequence[k][j];
     O(n)
   */
-  void peformsRemovalOutsourcing(int i, int k, int j);
-  void swap(int k1, int i, int k2, int j);
+  void peformsRemovalOutsourcing(int i, int k, int j, int size);
 
 public:
   Solution(/* args */);
