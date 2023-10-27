@@ -41,6 +41,8 @@ int vnd() {
   cout << Reader::instance->getInstanceName() << ";" << s.Cost() << ";"
        << duration_.count() / 1000 << endl;
 
+  // cout << s.calculateCost() << endl;
+
   return 0;
 }
 
