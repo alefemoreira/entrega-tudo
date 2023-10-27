@@ -4,6 +4,7 @@
 #include <iostream>
 #include <math.h>
 #include <vector>
+#include <algorithm>
 
 using namespace std;
 
@@ -237,7 +238,7 @@ bool Solution::bestImprovementTwoOpt() {
 
   if (bestDelta < 0) {
     this->cost += bestDelta;
-    std::reverse(this->sequence[bestK].begin() + bestI,
+    reverse(this->sequence[bestK].begin() + bestI,
                  this->sequence[bestK].begin() + bestJ + 1);
     // std::swap(this->sequence[bestK][bestI], this->sequence[bestK][bestJ]);
 
