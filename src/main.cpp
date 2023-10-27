@@ -44,6 +44,31 @@ int vnd() {
   return 0;
 }
 
+bool ils()
+{
+  Solution s0, s1;
+  s0.build();
+  s0.localSearch();
+  
+  /*int roundsWithoutImprove = 0;
+  while (roundsWithoutImprove <= 3)
+  {
+    s1 = Solution::disturbance(&s0);
+    s1.localSearch();
+
+    // improve?
+
+    // Criterio de aceitação
+
+  }*/
+
+  s1 = Solution::disturbance(&s0);
+
+
+  return true;
+}
+
+
 int main(int argc, char **argv) {
   cout << fixed << std::setprecision(5);
   if (argc < 3) {
@@ -74,9 +99,7 @@ int main(int argc, char **argv) {
     return vnd();
 
   case 3:
-    cout << "ILS ainda não implementado" << endl;
-    return 0;
-
+    return ils();
   default:
     cout << "Opção inválida" << endl;
     return 1;
