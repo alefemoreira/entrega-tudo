@@ -591,17 +591,28 @@ void Solution::setSequence(vector<vector<int>> *sequence) {
 
 double Solution::calculateCost() {
   this->cost = 0;
+  this->deliveries = 0;
+  this->vehicles = 0;
   double r = Reader::instance->getCarUseCost();
   int K = this->sequence.size();
 
   for (int k = 0; k < K - 1; k++) {
+    this->capacities[k] = 0;
 
-    if (this->sequence[k].size() > 2)
+    if (this->sequence[k].size() > 2) {
       this->cost += r;
+      this->vehicles++;
+      this->deliveries += this->sequence[k].size() - 2;
+    }
 
-    for (int i = 0, j = 1; j < this->sequence[k].size(); i++, j++)
+    for (int i = 0, j = 1; j < this->sequence[k].size(); i++, j++) {
+      if (this->sequence[k][j] != 0)
+        this->capacities[k] +=
+            Reader::instance->getDemand(this->sequence[k][j]);
+
       this->cost += Reader::instance->getDistance(this->sequence[k][i],
                                                   this->sequence[k][j]);
+    }
   }
 
   for (int i = 0; i < this->sequence[K - 1].size(); i++)
