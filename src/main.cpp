@@ -33,8 +33,8 @@ int vnd()
   using std::chrono::high_resolution_clock;
   using std::chrono::milliseconds;
 
-  Solution s;
   auto start = std::chrono::high_resolution_clock::now();
+  Solution s;
 
   s.build();
   s.localSearch();
@@ -52,31 +52,72 @@ int vnd()
   return 0;
 }
 
-bool ils()
-{
-  Solution s0, s1;
-  s0.build();
-  s0.localSearch();
 
-  /*int roundsWithoutImprove = 0;
-  while (roundsWithoutImprove <= 3)
-  {
-    s1 = Solution::disturbance(&s0);
-    s1.localSearch();
+Solution *ILS(int maxIter, int maxIterIls) {
+  Solution *bestOfAll = new Solution();
+  Solution *best, *s;
+  bestOfAll->setCost(INFINITY);
 
-    // improve?
+  for (int i = 0; i < maxIter; i++) {
+    s = new Solution();
+    s->build();
+    best = s;
 
-    // Criterio de aceitação
+    int iterIls = 0;
+    while (iterIls <= maxIterIls) {
+      s->localSearch();
+      if (s->Cost() < best->Cost()) {
+        best = s;
+        iterIls = 0;
+      } else if (s != best) {
+        delete s;
+      }
+      s = Solution::disturbance(best);
+      iterIls++;
+    }
 
-  }*/
+    if (s != best) {
+      delete s;
+    }
 
-  s1 = Solution::disturbance(&s0);
-
-  return true;
+    if (best->Cost() < bestOfAll->Cost()) {
+      bestOfAll = best;
+    } else {
+      delete best;
+    }
+  }
+  return bestOfAll;
 }
 
-int main(int argc, char **argv)
-{
+int ils() {
+  using std::chrono::duration;
+  using std::chrono::duration_cast;
+  using std::chrono::high_resolution_clock;
+  using std::chrono::milliseconds;
+
+  int n = Reader::instance->getDimension();
+
+  int maxIterIls = n;
+
+  if (n > 150) {
+    maxIterIls /= 2;
+  }
+
+  auto start = std::chrono::high_resolution_clock::now();
+
+  Solution *s = ILS(50, maxIterIls);
+
+  auto end = std::chrono::high_resolution_clock::now();
+  duration<double, std::milli> duration_ = end - start;
+
+  cout << Reader::instance->getInstanceName() << ";" << s->Cost() << ";"
+       << duration_.count() / 1000 << endl;
+
+  return 0;
+}
+
+int main(int argc, char **argv) {
+
   cout << fixed << std::setprecision(5);
   if (argc < 3)
   {
@@ -112,6 +153,7 @@ int main(int argc, char **argv)
 
   case 3:
     return ils();
+
   default:
     cout << "Opção inválida" << endl;
     return 1;
