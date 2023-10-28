@@ -4,8 +4,7 @@
 #include <iostream>
 #include <vector>
 
-class Solution
-{
+class Solution {
 private:
   double cost;    // custo da solução
   int vehicles;   // qtd de vehicles usada pela solução
@@ -24,7 +23,6 @@ private:
   void reinsertion(int k, int i, int l, int j, int size);
   void peformsReinsertionOutsourcing(int k, int i, int size);
   void disturbance();
-  std::vector<int> copyBlock(std::vector<int> &vetor, int start, int length);
 
   /*
     Remove elemento outsouring[i] e insere em sequence[k][j];

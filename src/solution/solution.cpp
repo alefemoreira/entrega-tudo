@@ -326,7 +326,7 @@ bool Solution::feasible() {
   double calculatedCost = this->calculateCost();
 
   if (originalCost != calculatedCost) {
-    cout << " Custo errado ";
+    cout << " Custo errado " << originalCost << "!=" << calculatedCost << " ";
     return false;
   }
 
@@ -606,12 +606,12 @@ double Solution::calculateCost() {
     }
 
     for (int i = 0, j = 1; j < this->sequence[k].size(); i++, j++) {
-      if (this->sequence[k][j] != 0)
-        this->capacities[k] +=
-            Reader::instance->getDemand(this->sequence[k][j]);
-
       this->cost += Reader::instance->getDistance(this->sequence[k][i],
                                                   this->sequence[k][j]);
+    }
+
+    for (int i = 1; i < this->sequence[k].size() - 1; i++) {
+      this->capacities[k] += Reader::instance->getDemand(this->sequence[k][i]);
     }
   }
 
@@ -675,155 +675,77 @@ Solution *Solution::disturbance(Solution *s) {
   return p;
 }
 
-struct DisturbancePositions {
-  int k;
-  int i;
-  int size;
-};
-
 void Solution::disturbance() {
   // Carro 1
-  int k = rand() % this->sequence.size();
-  while ((this->sequence[k].size() - 2) == 0) {
-    k = rand() % this->sequence.size();
+  int k = rand() % (this->sequence.size() - 1);
+
+  while (this->sequence[k].size() - 2 <= 0) {
+    k = rand() % (this->sequence.size() - 1);
   }
 
   // Bloco do carro 1
-  int i = rand() % (this->sequence[k].size() - 2) + 1;
   int maxSize = max(1, int(floor(this->sequence[k].size() / 10)));
   int size1 = 1 + rand() % maxSize;
+  int i = rand() % (this->sequence[k].size() - 2 - size1) + 1;
 
   // Carro 2
-  int l = rand() % this->sequence.size();
-  while ((this->sequence[l].size() - 2) == 0 || l == k) {
-    l = rand() % this->sequence.size();
+  int l = rand() % (this->sequence.size() - 1);
+  while (l == k) {
+    l = rand() % (this->sequence.size() - 1);
   }
 
-  // Bloco do carro 2
-  int j = rand() % (this->sequence[l].size() - 2) + 1;
-  int maxSize2 = max(1, int(floor(this->sequence[l].size() / 10)));
-  int size2 = 1 + rand() % maxSize2;
-
   // Blocos
-  vector<int> blockK, blockL;
+  int Q = Reader::instance->getCarCapacity();
+  int r = Reader::instance->getCarUseCost();
+  vector<int> blockK;
+  int blockCapacity = 0;
 
   for (int v = i; v < i + size1; v++) {
     blockK.push_back(this->sequence[k][v]);
+    blockCapacity += Reader::instance->getDemand(this->sequence[k][v]);
   }
-
-  for (int v = i; v < j + size2; v++) {
-    blockL.push_back(this->sequence[l][v]);
-  }
-
-  /*cout << "Bloco 1: ";
-  for (size_t i = 0; i < blockK.size(); i++)
-  {
-    cout << blockK[i] << " ";
-  }
-  cout << endl;
-  cout << endl;
-
-  cout << "Bloco 1: ";
-  for (size_t i = 0; i < blockL.size(); i++)
-  {
-    cout << blockL[i] << " ";
-  }
-  cout << endl;
-  cout << endl;*/
 
   // Validando as capacidades
-  int totalCapacity = Reader::instance->getCarCapacity();
-  int minimunDelevery = Reader::instance->getMinimumDelivery();
-  int blockCapacity1 = 0;
-  int blockCapacity2 = 0;
+  if (this->capacities[l] + blockCapacity <= Q) {
+    double delta = 0;
 
-  for (size_t o = 0; o < blockK.size(); o++) {
-    blockCapacity1 += Reader::instance->getDemand(blockK[o]);
-  }
+    int viPrev = this->sequence[k][i - 1];
+    int vi = this->sequence[k][i];
 
-  for (size_t o = 0; o < blockL.size(); o++) {
-    blockCapacity2 += Reader::instance->getDemand(blockL[o]);
-  }
+    int vi2 = this->sequence[k][i + size1 - 1];
+    int vi2Next = this->sequence[k][i + size1];
 
-  /*cout << "Demanda do bloco 1 " << blockCapacity1 << endl;
-  cout << "Demanda do bloco 2 " << blockCapacity2 << endl;
+    int j = rand() % (this->sequence[l].size() - 1);
 
-  cout << "Capcidade total " << totalCapacity << endl;
-  cout << "Capacidade 1: " << this->capacities[k] << endl;
-  cout << "Capacidade 2: " << this->capacities[l] << endl;*/
-
-  // Capacidades
-  bool isAproved = ((this->capacities[k] - blockCapacity1) + blockCapacity2 <=
-                    totalCapacity) &&
-                   ((this->capacities[l] - blockCapacity2) + blockCapacity1 <=
-                    totalCapacity);
-
-  // Entregas minimas para caso algum dos blocos faça parte dos terceirizados
-  if (k == this->sequence.size() - 1) {
-    isAproved =
-        isAproved &&
-        ((this->deliveries - blockL.size() + blockK.size()) >= minimunDelevery);
-  } else if (l == this->sequence.size() - 1) {
-    isAproved =
-        isAproved &&
-        ((this->deliveries - blockK.size() + blockL.size()) >= minimunDelevery);
-  }
-
-  if (isAproved) {
-
-    /*cout << "Carro " << k << " antes da troca: ";
-    for (size_t i = 0; i < this->sequence[k].size(); i++)
-    {
-      cout << this->sequence[k][i] << " ";
+    if (this->sequence[l].size() == 2) {
+      j = 0;
+      delta += r;
     }
-    cout << endl;
 
-    cout << "Carro " << l << " antes da troca: ";
-    for (size_t i = 0; i < this->sequence[l].size(); i++)
-    {
-      cout << this->sequence[l][i] << " ";
-    }
-    cout << endl;
-    cout << endl; */
+    int vj = this->sequence[l][j];
+    int vjNext = this->sequence[l][j + 1];
 
     // Trocando os blocos
     this->sequence[k].erase(this->sequence[k].begin() + i,
                             this->sequence[k].begin() + i + size1);
-    this->sequence[l].erase(this->sequence[l].begin() + j,
-                            this->sequence[l].begin() + j + size2);
 
-    /*cout << "Carro " << k << " depois da remoção de " << i << " até " << i;
-    for (size_t i = 0; i < this->sequence[k].size(); i++)
-    {
-      cout << this->sequence[k][i] << " ";
-    }
-    cout << endl;
-
-    cout << "Carro " << l << " depois da remoção de " << j << " até " << j +
-    size2; for (size_t i = 0; i < this->sequence[l].size(); i++)
-    {
-      cout << this->sequence[l][i] << " ";
-    }
-    cout << endl;
-    cout << endl;*/
-
-    this->sequence[k].insert(this->sequence[k].begin() + i, blockL.begin(),
-                             blockL.end());
-    this->sequence[l].insert(this->sequence[l].begin() + j, blockK.begin(),
+    this->sequence[l].insert(this->sequence[l].begin() + j + 1, blockK.begin(),
                              blockK.end());
 
-    /*cout << "Carro " << k << " depois da reinserção ";
-    for (size_t i = 0; i < this->sequence[k].size(); i++)
-    {
-      cout << this->sequence[k][i] << " ";
-    }
-    cout << endl;
+    this->capacities[l] += blockCapacity;
+    this->capacities[k] -= blockCapacity;
 
-    cout << "Carro " << l << " depois da reinserção ";
-    for (size_t i = 0; i < this->sequence[l].size(); i++)
-    {
-      cout << this->sequence[l][i] << " ";
+    delta += Reader::instance->getDistance(viPrev, vi2Next) +
+             Reader::instance->getDistance(vj, vi) +
+             Reader::instance->getDistance(vi2, vjNext) -
+             Reader::instance->getDistance(viPrev, vi) -
+             Reader::instance->getDistance(vj, vjNext) -
+             Reader::instance->getDistance(vi2, vi2Next);
+
+    if (sequence[k].size() == 2) {
+      delta -= r;
     }
-    cout << endl;*/
+
+    this->cost += delta;
   }
 }
