@@ -1,0 +1,10 @@
+Custo Total: 15
+Custo de roteamento: 9
+Custo de utilização dos veículos: 1
+Custo de terceirização: 5
+
+Rota de terceirização: 2 6 
+
+Número de rotas: 1
+4 3 1 5 
+

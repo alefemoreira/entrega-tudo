@@ -5,7 +5,8 @@
 
 using namespace std;
 
-int guloso() {
+int guloso()
+{
   using std::chrono::duration;
   using std::chrono::duration_cast;
   using std::chrono::high_resolution_clock;
@@ -20,10 +21,13 @@ int guloso() {
   cout << Reader::instance->getInstanceName() << ";" << s.Cost() << ";"
        << duration_.count() / 1000 << endl;
 
+  s.writeSolution();
+
   return 0;
 }
 
-int vnd() {
+int vnd()
+{
   using std::chrono::duration;
   using std::chrono::duration_cast;
   using std::chrono::high_resolution_clock;
@@ -43,6 +47,8 @@ int vnd() {
 
   // cout << s.calculateCost() << endl;
 
+  s.writeSolution();
+
   return 0;
 }
 
@@ -51,7 +57,7 @@ bool ils()
   Solution s0, s1;
   s0.build();
   s0.localSearch();
-  
+
   /*int roundsWithoutImprove = 0;
   while (roundsWithoutImprove <= 3)
   {
@@ -66,14 +72,14 @@ bool ils()
 
   s1 = Solution::disturbance(&s0);
 
-
   return true;
 }
 
-
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   cout << fixed << std::setprecision(5);
-  if (argc < 3) {
+  if (argc < 3)
+  {
     cout << "Necessário indicar arquivo, opção de execução [guloso : 1, vnd: "
             "2, ils: 3] e seed [opcional]"
          << endl;
@@ -86,14 +92,18 @@ int main(int argc, char **argv) {
   Reader::instance->read();
 
   int op = atoi(argv[2]);
-  if (argc >= 4) {
+  if (argc >= 4)
+  {
     int seed = atoi(argv[3]);
     srand(seed);
-  } else {
+  }
+  else
+  {
     srand(time(0));
   }
 
-  switch (op) {
+  switch (op)
+  {
   case 1:
     return guloso();
 
