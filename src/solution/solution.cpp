@@ -791,33 +791,33 @@ void Solution::disturbance()
   int size2 = 1 + rand() % maxSize2;
 
   // Blocos
-  vector<int> block1, block2;
+  vector<int> blockK, blockL;
 
   for (int v = i; v < i + size1; v++)
   {
-    block1.push_back(this->sequence[k][v]);
+    blockK.push_back(this->sequence[k][v]);
   }
 
   for (int v = i; v < j + size2; v++)
   {
-    block2.push_back(this->sequence[l][v]);
+    blockL.push_back(this->sequence[l][v]);
   }
 
-  cout << "Bloco 1: ";
-  for (size_t i = 0; i < block1.size(); i++)
+  /*cout << "Bloco 1: ";
+  for (size_t i = 0; i < blockK.size(); i++)
   {
-    cout << block1[i] << " ";
+    cout << blockK[i] << " ";
   }
   cout << endl;
   cout << endl;
 
   cout << "Bloco 1: ";
-  for (size_t i = 0; i < block2.size(); i++)
+  for (size_t i = 0; i < blockL.size(); i++)
   {
-    cout << block2[i] << " ";
+    cout << blockL[i] << " ";
   }
   cout << endl;
-  cout << endl;
+  cout << endl;*/
 
   // Validando as capacidades
   int totalCapacity = Reader::instance->getCarCapacity();
@@ -825,24 +825,36 @@ void Solution::disturbance()
   int blockCapacity1 = 0;
   int blockCapacity2 = 0;
 
-  for (size_t o = 0; o < block1.size(); o++)
+  for (size_t o = 0; o < blockK.size(); o++)
   {
-    blockCapacity1 += Reader::instance->getDemand(block1[o]);
+    blockCapacity1 += Reader::instance->getDemand(blockK[o]);
   }
 
-  for (size_t o = 0; o < block2.size(); o++)
+  for (size_t o = 0; o < blockL.size(); o++)
   {
-    blockCapacity2 += Reader::instance->getDemand(block2[o]);
+    blockCapacity2 += Reader::instance->getDemand(blockL[o]);
   }
 
-  cout << "Demanda do bloco 1 " << blockCapacity1 << endl;
+  /*cout << "Demanda do bloco 1 " << blockCapacity1 << endl;
   cout << "Demanda do bloco 2 " << blockCapacity2 << endl;
 
   cout << "Capcidade total " << totalCapacity << endl;
   cout << "Capacidade 1: " << this->capacities[k] << endl;
-  cout << "Capacidade 2: " << this->capacities[l] << endl;
+  cout << "Capacidade 2: " << this->capacities[l] << endl;*/
 
+  // Capacidades
   bool isAproved = ((this->capacities[k] - blockCapacity1) + blockCapacity2 <= totalCapacity) && ((this->capacities[l] - blockCapacity2) + blockCapacity1 <= totalCapacity);
+
+  // Entregas minimas para caso algum dos blocos faça parte dos terceirizados
+  if (k == this->sequence.size() - 1)
+  {
+    isAproved = isAproved && ((this->deliveries - blockL.size() + blockK.size()) >= minimunDelevery);
+  } else if (l == this->sequence.size() - 1)
+  {
+    isAproved = isAproved && ((this->deliveries - blockK.size() +  blockL.size()) >= minimunDelevery);
+    
+  }
+  
   if (isAproved)
   {
 
@@ -880,8 +892,8 @@ void Solution::disturbance()
     cout << endl;
     cout << endl;*/
 
-    this->sequence[k].insert(this->sequence[k].begin() + i, block2.begin(), block2.end());
-    this->sequence[l].insert(this->sequence[l].begin() + j, block1.begin(), block1.end());
+    this->sequence[k].insert(this->sequence[k].begin() + i, blockL.begin(), blockL.end());
+    this->sequence[l].insert(this->sequence[l].begin() + j, blockK.begin(), blockK.end());
 
     /*cout << "Carro " << k << " depois da reinserção ";
     for (size_t i = 0; i < this->sequence[k].size(); i++)

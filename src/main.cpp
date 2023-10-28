@@ -5,7 +5,8 @@
 
 using namespace std;
 
-int guloso() {
+int guloso()
+{
   using std::chrono::duration;
   using std::chrono::duration_cast;
   using std::chrono::high_resolution_clock;
@@ -23,7 +24,8 @@ int guloso() {
   return 0;
 }
 
-int vnd() {
+int vnd()
+{
   using std::chrono::duration;
   using std::chrono::duration_cast;
   using std::chrono::high_resolution_clock;
@@ -46,34 +48,46 @@ int vnd() {
   return 0;
 }
 
-bool ils()
+int ils(int maxIter, int maxIterIls)
 {
   Solution s0, s1;
   s0.build();
   s0.localSearch();
-  
-  /*int roundsWithoutImprove = 0;
-  while (roundsWithoutImprove <= 3)
+  cout << "Custo inicial: " << s0.Cost() << endl;
+
+  for (int i = 0; i < maxIterIls; i++)
   {
-    s1 = Solution::disturbance(&s0);
-    s1.localSearch();
 
-    // improve?
+    int roundsWithoutImprove = 0;
+    while (roundsWithoutImprove <= maxIter)
+    {
+      s1 = Solution::disturbance(&s0);
+      s1.localSearch();
+      s1.calculateCost();
 
-    // Criterio de aceitação
+      // improve?
+      if (s0.Cost() <= s1.Cost())
+      {
+        roundsWithoutImprove += 1;
+      }
+      else
+      {
+        s0 = s1;
+      }
+    }
+  }
+  cout << "Custo final: " << s0.Cost() << endl;
 
-  }*/
+  // s1 = Solution::disturbance(&s0);
 
-  s1 = Solution::disturbance(&s0);
-
-
-  return true;
+  return 0;
 }
 
-
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   cout << fixed << std::setprecision(5);
-  if (argc < 3) {
+  if (argc < 3)
+  {
     cout << "Necessário indicar arquivo, opção de execução [guloso : 1, vnd: "
             "2, ils: 3] e seed [opcional]"
          << endl;
@@ -86,14 +100,18 @@ int main(int argc, char **argv) {
   Reader::instance->read();
 
   int op = atoi(argv[2]);
-  if (argc >= 4) {
+  if (argc >= 4)
+  {
     int seed = atoi(argv[3]);
     srand(seed);
-  } else {
+  }
+  else
+  {
     srand(time(0));
   }
 
-  switch (op) {
+  switch (op)
+  {
   case 1:
     return guloso();
 
@@ -101,7 +119,7 @@ int main(int argc, char **argv) {
     return vnd();
 
   case 3:
-    return ils();
+    return ils(20, 10000);
   default:
     cout << "Opção inválida" << endl;
     return 1;
