@@ -682,23 +682,148 @@ struct DisturbancePositions {
 };
 
 void Solution::disturbance() {
+  // Carro 1
   int k = rand() % this->sequence.size();
-  while (this->sequence[k].size() == 2) {
+  while ((this->sequence[k].size() - 2) == 0) {
     k = rand() % this->sequence.size();
   }
 
+  // Bloco do carro 1
   int i = rand() % (this->sequence[k].size() - 2) + 1;
-  int maxSize = this->sequence[k].size() / 10;
-  int size1 = rand() % (max(2, maxSize) - 2 + 1) + 2;
+  int maxSize = max(1, int(floor(this->sequence[k].size() / 10)));
+  int size1 = 1 + rand() % maxSize;
 
+  // Carro 2
   int l = rand() % this->sequence.size();
-  int j, size2;
+  while ((this->sequence[l].size() - 2) == 0 || l == k) {
+    l = rand() % this->sequence.size();
+  }
 
-  if (this->sequence[l].size() != 2) {
-    j = rand() % (this->sequence[l].size() - 2) + 1;
-    maxSize = this->sequence[k].size() / 10;
-    size2 = rand() % (max(2, maxSize) - 2 + 1) + 2;
+  // Bloco do carro 2
+  int j = rand() % (this->sequence[l].size() - 2) + 1;
+  int maxSize2 = max(1, int(floor(this->sequence[l].size() / 10)));
+  int size2 = 1 + rand() % maxSize2;
 
-  } else {
+  // Blocos
+  vector<int> blockK, blockL;
+
+  for (int v = i; v < i + size1; v++) {
+    blockK.push_back(this->sequence[k][v]);
+  }
+
+  for (int v = i; v < j + size2; v++) {
+    blockL.push_back(this->sequence[l][v]);
+  }
+
+  /*cout << "Bloco 1: ";
+  for (size_t i = 0; i < blockK.size(); i++)
+  {
+    cout << blockK[i] << " ";
+  }
+  cout << endl;
+  cout << endl;
+
+  cout << "Bloco 1: ";
+  for (size_t i = 0; i < blockL.size(); i++)
+  {
+    cout << blockL[i] << " ";
+  }
+  cout << endl;
+  cout << endl;*/
+
+  // Validando as capacidades
+  int totalCapacity = Reader::instance->getCarCapacity();
+  int minimunDelevery = Reader::instance->getMinimumDelivery();
+  int blockCapacity1 = 0;
+  int blockCapacity2 = 0;
+
+  for (size_t o = 0; o < blockK.size(); o++) {
+    blockCapacity1 += Reader::instance->getDemand(blockK[o]);
+  }
+
+  for (size_t o = 0; o < blockL.size(); o++) {
+    blockCapacity2 += Reader::instance->getDemand(blockL[o]);
+  }
+
+  /*cout << "Demanda do bloco 1 " << blockCapacity1 << endl;
+  cout << "Demanda do bloco 2 " << blockCapacity2 << endl;
+
+  cout << "Capcidade total " << totalCapacity << endl;
+  cout << "Capacidade 1: " << this->capacities[k] << endl;
+  cout << "Capacidade 2: " << this->capacities[l] << endl;*/
+
+  // Capacidades
+  bool isAproved = ((this->capacities[k] - blockCapacity1) + blockCapacity2 <=
+                    totalCapacity) &&
+                   ((this->capacities[l] - blockCapacity2) + blockCapacity1 <=
+                    totalCapacity);
+
+  // Entregas minimas para caso algum dos blocos faça parte dos terceirizados
+  if (k == this->sequence.size() - 1) {
+    isAproved =
+        isAproved &&
+        ((this->deliveries - blockL.size() + blockK.size()) >= minimunDelevery);
+  } else if (l == this->sequence.size() - 1) {
+    isAproved =
+        isAproved &&
+        ((this->deliveries - blockK.size() + blockL.size()) >= minimunDelevery);
+  }
+
+  if (isAproved) {
+
+    /*cout << "Carro " << k << " antes da troca: ";
+    for (size_t i = 0; i < this->sequence[k].size(); i++)
+    {
+      cout << this->sequence[k][i] << " ";
+    }
+    cout << endl;
+
+    cout << "Carro " << l << " antes da troca: ";
+    for (size_t i = 0; i < this->sequence[l].size(); i++)
+    {
+      cout << this->sequence[l][i] << " ";
+    }
+    cout << endl;
+    cout << endl; */
+
+    // Trocando os blocos
+    this->sequence[k].erase(this->sequence[k].begin() + i,
+                            this->sequence[k].begin() + i + size1);
+    this->sequence[l].erase(this->sequence[l].begin() + j,
+                            this->sequence[l].begin() + j + size2);
+
+    /*cout << "Carro " << k << " depois da remoção de " << i << " até " << i;
+    for (size_t i = 0; i < this->sequence[k].size(); i++)
+    {
+      cout << this->sequence[k][i] << " ";
+    }
+    cout << endl;
+
+    cout << "Carro " << l << " depois da remoção de " << j << " até " << j +
+    size2; for (size_t i = 0; i < this->sequence[l].size(); i++)
+    {
+      cout << this->sequence[l][i] << " ";
+    }
+    cout << endl;
+    cout << endl;*/
+
+    this->sequence[k].insert(this->sequence[k].begin() + i, blockL.begin(),
+                             blockL.end());
+    this->sequence[l].insert(this->sequence[l].begin() + j, blockK.begin(),
+                             blockK.end());
+
+    /*cout << "Carro " << k << " depois da reinserção ";
+    for (size_t i = 0; i < this->sequence[k].size(); i++)
+    {
+      cout << this->sequence[k][i] << " ";
+    }
+    cout << endl;
+
+    cout << "Carro " << l << " depois da reinserção ";
+    for (size_t i = 0; i < this->sequence[l].size(); i++)
+    {
+      cout << this->sequence[l][i] << " ";
+    }
+    cout << endl;*/
   }
 }
