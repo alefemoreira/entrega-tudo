@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <fstream> // Inclua a biblioteca fstream
 
 class Solution {
 private:
@@ -41,6 +42,7 @@ public:
   void setVehicles(int vehicles);
   inline void setSequence(std::vector<std::vector<int>> *sequence);
   static Solution *disturbance(Solution *s);
+  void writeSolution();
 
   double calculateCost();
   bool feasible();
