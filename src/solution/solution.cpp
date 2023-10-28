@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <math.h>
+#include <sstream>
 #include <vector>
 
 using namespace std;
@@ -750,31 +751,42 @@ void Solution::disturbance() {
   }
 }
 
-void Solution::writeSolution()
-{
-  string filename = "out/" + Reader::instance->getInstanceName() + "_solution.txt";
+std::string convertTimeTToString(time_t t) {
+  struct tm *timeinfo = localtime(&t);
+  std::ostringstream oss;
+
+  oss << std::setw(4) << std::setfill('0') << timeinfo->tm_year + 1900
+      << std::setw(2) << std::setfill('0') << timeinfo->tm_mon + 1
+      << std::setw(2) << std::setfill('0') << timeinfo->tm_mday << std::setw(2)
+      << std::setfill('0') << timeinfo->tm_hour << std::setw(2)
+      << std::setfill('0') << timeinfo->tm_min;
+
+  return oss.str();
+}
+
+void Solution::writeSolution() {
+  std::time_t t = std::time(0);
+
+  string filename = "out/" + Reader::instance->getInstanceName() +
+                    "_solution_" + convertTimeTToString(t) + ".txt";
 
   ofstream file;
   file.open(filename);
 
-  if (file.is_open())
-  {
+  if (file.is_open()) {
     double costRoute = 0; // custo de roteamento
     double outsourcingCost = 0;
     double costVehicles = Reader::instance->getCarUseCost() * this->vehicles;
 
-    cout << Reader::instance->getCarUseCost() << " " << this->vehicles << " " << costVehicles << endl;
     string routes = "";
     string outsourcing = "";
     int K = this->sequence.size();
 
-    for (int k = 0; k < this->vehicles; k++)
-    {
-      for (int i = 0, j = 1; j < this->sequence[k].size(); i++, j++)
-      {
-        costRoute += Reader::instance->getDistance(this->sequence[k][i], this->sequence[k][j]);
-        if (this->sequence[k][i] != 0)
-        {
+    for (int k = 0; k < this->vehicles; k++) {
+      for (int i = 0, j = 1; j < this->sequence[k].size(); i++, j++) {
+        costRoute += Reader::instance->getDistance(this->sequence[k][i],
+                                                   this->sequence[k][j]);
+        if (this->sequence[k][i] != 0) {
           routes += to_string(this->sequence[k][i]) + " ";
         }
       }
@@ -782,20 +794,20 @@ void Solution::writeSolution()
       routes += "\n";
     }
 
-    for (int i = 0; i < this->sequence[K - 1].size(); i++)
-    {
-      outsourcingCost += Reader::instance->getOutsourcing(this->sequence[K - 1][i]);
+    for (int i = 0; i < this->sequence[K - 1].size(); i++) {
+      outsourcingCost +=
+          Reader::instance->getOutsourcing(this->sequence[K - 1][i]);
       outsourcing += to_string(this->sequence[K - 1][i]) + " ";
     }
 
-    file << "Custo Total: " << this->cost << endl;
-    file << "Custo de roteamento: " << costRoute << endl;
-    file << "Custo de utilização dos veículos: " << costVehicles << endl;
-    file << "Custo de terceirização: " << outsourcingCost << endl;
+    file << this->cost << endl;
+    file << costRoute << endl;
+    file << costVehicles << endl;
+    file << outsourcingCost << endl;
     file << endl;
-    file << "Rota de terceirização: " << outsourcing << endl;
+    file << outsourcing << endl;
     file << endl;
-    file << "Número de rotas: " << this->vehicles << endl;
+    file << this->vehicles << endl;
     file << routes << endl;
 
     file.close();

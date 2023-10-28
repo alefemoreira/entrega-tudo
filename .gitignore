@@ -37,3 +37,4 @@ settings.json
 
 .DS_Store
 executions*/
+out/**/*.txt
