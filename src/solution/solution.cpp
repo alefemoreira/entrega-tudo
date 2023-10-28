@@ -908,8 +908,11 @@ void Solution::writeSolution()
 
   if (file.is_open())
   {
-    int costRoute = 0; // custo de roteamento
-    int outsourcingCost = 0;
+    double costRoute = 0; // custo de roteamento
+    double outsourcingCost = 0;
+    double costVehicles = Reader::instance->getCarUseCost() * this->vehicles;
+
+    cout << Reader::instance->getCarUseCost() << " " << this->vehicles << " " << costVehicles << endl;
     string routes = "";
     string outsourcing = "";
     int K = this->sequence.size();
@@ -936,7 +939,7 @@ void Solution::writeSolution()
 
     file << "Custo Total: " << this->cost << endl;
     file << "Custo de roteamento: " << costRoute << endl;
-    file << "Custo de utilização dos veículos: " << Reader::instance->getCarUseCost() * this->vehicles << endl;
+    file << "Custo de utilização dos veículos: " << costVehicles << endl;
     file << "Custo de terceirização: " << outsourcingCost << endl;
     file << endl;
     file << "Rota de terceirização: " << outsourcing << endl;
